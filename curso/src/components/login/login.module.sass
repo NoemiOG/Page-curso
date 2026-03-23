@@ -1,0 +1,81 @@
+.container
+  height: 100vh
+  display: flex
+  justify-content: center
+  align-items: center
+  background-color: #f4f4f4
+
+.card
+  display: flex
+  flex-direction: column
+  align-items: center
+  background: white
+  padding: 90px
+  border-radius: 20px
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1)
+  width: 100%
+  max-width: 500px
+  text-align: center
+
+.logoContainer
+  width: 100%
+  display: flex
+  justify-content: center
+  margin-bottom: 4rem // Espacio entre el logo y el input
+
+.logo
+  max-width: 400px // Ajusta según el tamaño de tu imagen
+  height: auto
+  object-fit: contain
+  margin-bottom: 10px
+  
+
+.form
+  display: flex
+  flex-direction: column
+
+.inputGroup
+  display: flex
+  align-items: center
+  background: #eee
+  border-radius: 10px
+  padding: 10px
+  margin-bottom: 20px
+  border: 1px solid transparent
+  transition: border-color 0.3s
+
+  &:focus-within
+    border-color: #61001a
+
+  input
+    border: none
+    background: none
+    outline: none
+    width: 100%
+    padding-left: 12px
+    
+    // Estilo cuando hay error
+    &.errorInput
+      color: #ff4d4d
+
+.errorText
+  color: #ff4d4d
+  font-size: 0.8rem
+  margin-top: -10px
+  margin-bottom: 10px
+  text-align: left
+
+.btnAcceder
+  width: 100%
+  padding: 20px
+  background-color: #61001a
+  color: white
+  border: none
+  border-radius: 10px
+  font-weight: bold
+  cursor: pointer
+  transition: background 0.3s
+  
+
+  &:hover
+    background-color: #800000

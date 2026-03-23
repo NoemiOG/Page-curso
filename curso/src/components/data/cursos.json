@@ -1,0 +1,135 @@
+[
+  {
+    "id": 1,
+    "titulo": "CURSO 1",
+    "secciones": [
+      {
+        "id": "1a",
+        "tipo": "presentacion",
+        "label": "PRESENTACIÓN",
+        "tituloTema": "AQUI VA UN TEMA BIEN PADRE",
+        "textoLargo": "una introducción divis, divis",
+        "slides": [
+        { "id": 1, "color": "#1abc9c", "content": "Bienvenido al curso" },
+        { "id": 2, "color": "#3498db", "content": "Concepto clave: React" },
+        { "id": 3, "color": "#9b59b6", "content": "Si le entendiste?" },
+        { "id": 4, "color": "#1abc9c", "content": "Se puede repetir" },
+        { "id": 5, "color": "#3498db", "content": "Perfecto" },
+        { "id": 6, "color": "#9b59b6", "content": "¡Puedes tomar el siguiente curso!" }
+  
+  ]
+      },
+      {
+        "id": "1b",
+        "tipo": "tema1",
+        "label": "CONTENIDO",
+        "tituloTema": "AQUI VA OTRO TEMA MAS PADRE",
+        "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
+      },
+      {
+        "id": "1c",
+        "tipo": "tema2",
+        "label": "CONTENIDO1",
+        "tituloTema": "Porque uno no es ninguno, mas temas padres",
+        "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
+      },
+      {
+        "id": "1d",
+        "tipo": "examen",
+        "label": "EXAMEN",
+        "tituloTema": "EXAMEN",
+        "instrucciones": "Instrucciones del examen. Tiempo, evaluación, no comer, no distracciones. Si repruebas mejor ya ni vengas, buscate otra chamba.",
+        "preguntas": [
+          {
+            "id": "q1",
+            "texto": "Cuando da clases Shrek",
+            "opciones": ["No da clases", "Los jueves", "Quien es Shrek", "Los lunes"],
+            "respuesta": 1
+          },
+          {
+            "id": "q2",
+            "texto": "Quien trabaja menos en la oficina",
+            "opciones": ["Andoni paseandose", "Randhy en el celular", "Todos trabajan por igual porque somos bien chambeadores, como de que no", "Ambos" ],
+            "respuesta": 2
+          },
+          {
+            "id": "q3",
+            "texto": "Cuanta agua se le pone al arroz",
+            "opciones": ["Dos tazas por una de arroz", "Mejor como en la calle", "Hasta que truene", "Arroz con leche?"],
+            "respuesta": 0
+          },
+          {
+            "id": "q4",
+            "texto": "Que le gusta hacer a Karina",
+            "opciones": ["Trabajar, como a todos", "Organizar convivencias", "Echar chismecito", "Llegar tarde" ],
+            "respuesta": 0
+          }
+          
+    ]
+      }
+    ]
+  },
+
+  {
+    "id": 2,
+    "titulo": "CURSO 2",
+    "secciones": [
+      {
+        "id": "2a",
+        "tipo": "presentacion",
+        "label": "CODIGO 2",
+        "tituloTema": "Pruebita",
+        "textoLargo": "una introducción divis, divis"
+      },
+      {
+        "id": "2b",
+        "tipo": "tema1",
+        "label": "CONTENIDO",
+        "tituloTema": "Pa checar si cambia",
+        "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
+      },
+      {
+        "id": "2c",
+        "tipo": "tema2",
+        "label": "CONTENIDO1",
+        "tituloTema": "Ya hace hambre, Maria",
+        "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
+      },
+
+      {
+        "id": "3e",
+        "tipo": "examen",
+        "label": "EXAMEN",
+        "tituloTema": "EXAMEN",
+        "instrucciones": "Instrucciones del examen. Tiempo, evaluación, no comer, no distracciones. Si repruebas mejor ya ni vengas, buscate otra chamba.",
+        "preguntas": [
+          {
+            "id": "q1",
+            "texto": "De que color es el caballo blanco de Napoleon",
+            "opciones": ["No se", "Ingatu", "Blanco", "Morado"],
+            "respuestaCorrecta": 1
+          },
+          {
+            "id": "q2",
+            "texto": "Quien es el papucho de la ofi",
+            "opciones": ["Andoni", "Andres, que el señor lo tenga en su gloria", "No hay", "Santo padre" ],
+            "respuestaCorrecta": 2
+          },
+          {
+            "id": "q3",
+            "texto": "Cuanta agua se le pone al arroz",
+            "opciones": ["Dos tazas por una de arroz", "Mejor como en la calle", "Hasta que truene", "Arroz con leche?"],
+            "respuestaCorrecta": 0
+          },
+          {
+            "id": "q4",
+            "texto": "Que le gusta hacer a Karina",
+            "opciones": ["Trabajar, como a todos", "Organizar convivencias", "Echar chismecito", "Llegar tarde" ],
+            "respuestaCorrecta": 0
+          }
+    ]
+ }
+    ] 
+    
+  }
+]

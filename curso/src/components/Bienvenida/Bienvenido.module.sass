@@ -1,0 +1,91 @@
+// Traemos las variables si las tienes en otro archivo
+// @import "../../variables"
+
+.welcomeContainer
+  padding: 40px
+  max-width: 1200px
+  margin: 0 auto
+  animation: fadeIn 0.5s ease-in
+
+.hero
+  text-align: center
+  margin-bottom: 50px
+  
+  h1
+    font-size: 2.5rem
+    color: #333
+    margin-bottom: 10px
+    font-weight: 700
+  
+  p
+    font-size: 1.2rem
+    color: #666
+
+.gridCursos
+  display: grid
+  // Esto hace que las tarjetas se acomoden solas según el ancho de la pantalla
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))
+  gap: 30px
+
+.cursoCard
+  background: #fff
+  border-radius: 15px
+  padding: 30px
+  text-align: center
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05)
+  transition: all 0.3s ease
+  cursor: pointer
+  border: 1px solid #eee
+  display: flex
+  flex-direction: column
+  align-items: center
+
+  &:hover
+    transform: translateY(-10px)
+    box-shadow: 0 12px 30px rgba(0,0,0,0.1)
+    border-color: #e02424 // El rojo de tu logo si quieres resaltar
+
+  .icon
+    font-size: 3rem
+    margin-bottom: 20px
+    background: #f8f9fa
+    width: 80px
+    height: 80px
+    display: flex
+    align-items: center
+    justify-content: center
+    border-radius: 50%
+
+  h3
+    font-size: 1.4rem
+    color: #222
+    margin-bottom: 15px
+
+  p
+    color: #888
+    font-size: 0.9rem
+    margin-bottom: 20px
+
+.btnEntrar
+  background: #e02424 // Rojo Chakray
+  color: white
+  border: none
+  padding: 10px 25px
+  border-radius: 25px
+  font-weight: 600
+  text-transform: uppercase
+  letter-spacing: 1px
+  transition: background 0.2s
+  margin-top: auto // Empuja el botón al fondo si hay títulos largos
+
+  &:hover
+    background: #b31d1d
+
+// Animación simple para que entre suave
+@keyframes fadeIn
+  from
+    opacity: 0
+    transform: translateY(20px)
+  to
+    opacity: 1
+    transform: translateY(0)

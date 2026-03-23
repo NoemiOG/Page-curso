@@ -1,0 +1,71 @@
+$color-vino: #61001a
+$color-vino-dark: #4a0014
+$color-texto: #333
+$color-texto-secundario: #666
+
+.examenContainer
+  padding: 2rem
+  color: $color-texto
+
+  .titulo
+    font-size: 2rem
+    text-transform: uppercase
+    margin-bottom: 0.5rem
+
+  .instrucciones
+    font-size: 0.9rem
+    color: $color-texto-secundario
+    margin-bottom: 2rem
+    line-height: 1.4
+
+  .preguntaGroup
+    margin-bottom: 1.5rem
+
+    .preguntaTexto
+      font-size: 1.1rem
+      font-weight: bold
+      margin-bottom: 0.75rem
+
+    .opcionesList
+      display: flex
+      flex-direction: column
+      gap: 0.5rem
+
+      .opcionLabel
+        display: flex
+        align-items: center
+        gap: 0.75rem
+        cursor: pointer
+        font-size: 1rem
+
+        .radioInput
+          // Estilo básico para el radio, puedes personalizarlo más si quieres
+          appearance: none // Quita el estilo por defecto
+          width: 1.2rem
+          height: 1.2rem
+          border: 2px solid #ccc
+          border-radius: 50%
+          outline: none
+          cursor: pointer
+          transition: border-color 0.2s, background-color 0.2s
+
+          &:checked
+            border-color: $color-vino
+            background-color: $color-vino // Rellena el círculo cuando está seleccionado
+
+          &:hover:not(:checked)
+            border-color: $color-vino-dark
+
+  .btnEnviar
+    margin-top: 1rem
+    background-color: $color-vino
+    color: white
+    border: none
+    padding: 10px 30px
+    font-weight: bold
+    cursor: pointer
+    float: right // Alinea el botón a la derecha como en tu imagen
+    transition: background-color 0.2s
+
+    &:hover
+      background-color: $color-vino-dark

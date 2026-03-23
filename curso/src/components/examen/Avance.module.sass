@@ -1,0 +1,102 @@
+// Variables de color basadas en tu marca
+$color-vino: #61001a
+$color-vino-claro: #8a0b2d
+$color-gris-claro: #e0e0e0
+$color-texto: #333
+
+.progresoContainer
+  padding: 3rem
+  max-width: 1000px
+  margin: 0 auto
+  color: $color-texto
+
+  h1, h2
+    font-family: 'Impact', sans-serif // O una fuente similar cargada
+    text-transform: uppercase
+    letter-spacing: 1px
+    margin-bottom: 2rem
+
+  // Estilo para las tarjetas de curso
+  .cursoCard
+    display: flex
+    align-items: center
+    gap: 4rem
+    margin-bottom: 3rem
+    padding: 1rem
+    border-bottom: 1px solid #eee
+
+    h3
+      min-width: 150px
+      font-size: 1.5rem
+
+    .stats
+      display: flex
+      align-items: center
+      gap: 3rem
+
+      // Círculo de porcentaje usando gradiente cónico
+      .circularProgress
+        width: 100px
+        height: 100px
+        border-radius: 50%
+        background: conic-gradient($color-vino 67%, $color-gris-claro 0)
+        display: flex
+        align-items: center
+        justify-content: center
+        position: relative
+
+        &::after
+          content: "67%"
+          position: absolute
+          width: 80px
+          height: 80px
+          background: white
+          border-radius: 50%
+          display: flex
+          align-items: center
+          justify-content: center
+          font-weight: bold
+          font-size: 1.2rem
+
+      .temasInfo
+        ul
+          list-style: none
+          padding: 0
+          font-size: 0.9rem
+          
+          li
+            margin-bottom: 0.5rem
+            
+            strong
+              display: block
+              color: #666
+              font-size: 0.75rem
+
+  // Sección de la gráfica de pastel final
+  .avanceGeneral
+    margin-top: 4rem
+    display: flex
+    flex-direction: column
+    align-items: center
+
+    .pieChart
+      width: 250px
+      height: 250px
+      border-radius: 50%
+      // Simulación de los 3 colores de tu imagen
+      background: conic-gradient($color-vino 0% 57%, #ff3366 57% 83%, #ddd 83% 100%)
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1)
+
+  .btnContinuar
+    margin-top: 3rem
+    background-color: $color-vino
+    color: white
+    border: none
+    padding: 15px 40px
+    font-weight: bold
+    cursor: pointer
+    transition: transform 0.2s
+    
+    &:hover
+      background-color: $color-vino-claro
+      transform: scale(1.05)
