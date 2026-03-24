@@ -12,7 +12,9 @@
   "dependencies": {
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "sass": "^1.98.0"
+    "sass": "^1.98.0",
+    "survey-core": "^2.5.16",
+    "survey-react-ui": "^2.5.16"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

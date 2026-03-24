@@ -3,7 +3,7 @@ import ExamenViewer from '../examen/ExamenPrueba';
 import ProgresoCursos from '../examen/Avance';
 import styles from './MainContent.module.sass';
 
-const MainContent = ({ activePage, cursos = [], onSelect, onFinishExamen }) => {
+const MainContent = ({ activePage, cursos = [], onSelect, onFinishExamen, userAnswers }) => {
   const [mostrarProgreso, setMostrarProgreso] = useState(false);
   const [pos, setPos] = useState(0);
 
@@ -13,7 +13,7 @@ const MainContent = ({ activePage, cursos = [], onSelect, onFinishExamen }) => {
     setMostrarProgreso(false);
   }, [activePage?.id]);
 
-  // --- 1. VALIDACIONES DE ESTADO (PANTALLAS COMPLETAS) ---
+  // --- VALIDACIONES DE ESTADO (VISTAS COMPLETAS) ---
   if (!activePage) {
     return (
       <div className={styles.emptyState}>
@@ -22,56 +22,49 @@ const MainContent = ({ activePage, cursos = [], onSelect, onFinishExamen }) => {
     );
   }
 
+  // Vista de Progreso/Resultado después del examen
   if (mostrarProgreso) {
     return (
       <div className={styles.fullView}>
         <ProgresoCursos 
-          titulo={activePage.tituloTema}
+          cursos={cursos}
+          userAnswers={userAnswers}
           onContinuar={() => setMostrarProgreso(false)} 
         />
       </div>
     );
   }
 
+  // Vista de Examen (SurveyJS)
   if (activePage.tipo === 'examen') {
     return (
       <div className={styles.fullView}>
         <ExamenViewer 
           data={activePage} 
-          onFinish={() => {
+          onFinish={(respuestas) => {
+            // Pasamos las respuestas reales hacia App.jsx
+            if (onFinishExamen) onFinishExamen(respuestas);
             setMostrarProgreso(true);
-            if (onFinishExamen) onFinishExamen();
           }} 
         />
       </div>
     );
   }
 
-  // --- 2. LÓGICA DE DIAPOSITIVAS Y NAVEGACIÓN ---
+  // --- LÓGICA DE DIAPOSITIVAS ---
   const slides = activePage?.slides || [
-    { id: 'default', color: '#ccc', content: 'Contenido informativo' }
+    { id: 'default', color: '#f0f0f0', content: 'Contenido del tema' }
   ];
   const totalSlides = slides.length;
   const esUltimaSlide = pos === totalSlides - 1;
 
-  // Buscamos el curso actual para saber qué sigue después de este tema
+  // Navegación entre temas
   const cursoActual = cursos.find(c => c.secciones.some(s => s.id === activePage.id));
-  const seccionesContenido = cursoActual?.secciones.filter(s => s.tipo !== 'examen') || [];
   
-  // ¿Es este el último tema antes del examen?
-  const esUltimoTema = activePage.id === seccionesContenido[seccionesContenido.length - 1]?.id;
-
   const handleNavegacion = () => {
-    if (esUltimoTema) {
-      // Si ya no hay más temas, buscamos el examen del curso
-      const examen = cursoActual.secciones.find(s => s.tipo === 'examen');
-      if (examen) onSelect(examen);
-    } else {
-      // Si hay más temas, buscamos el índice del actual y saltamos al siguiente
-      const indexActual = cursoActual.secciones.findIndex(s => s.id === activePage.id);
-      if (indexActual !== -1 && cursoActual.secciones[indexActual + 1]) {
-        onSelect(cursoActual.secciones[indexActual + 1]);
-      }
+    const indexActual = cursoActual.secciones.findIndex(s => s.id === activePage.id);
+    if (indexActual !== -1 && cursoActual.secciones[indexActual + 1]) {
+      onSelect(cursoActual.secciones[indexActual + 1]);
     }
   };
 
@@ -90,7 +83,7 @@ const MainContent = ({ activePage, cursos = [], onSelect, onFinishExamen }) => {
               <div
                 key={slide.id || index}
                 className={styles.slide}
-                style={{ background: slide.color }}
+                style={{ background: slide.color || '#fff' }}
               >
                 <h2>{slide.content}</h2>
               </div>
@@ -98,14 +91,12 @@ const MainContent = ({ activePage, cursos = [], onSelect, onFinishExamen }) => {
           </div>
         </div>
 
-        {/* CONTROLES: Solo si hay contenido para navegar */}
         {totalSlides > 1 && (
           <>
             <div className={styles.controlesFijos}>
               <button className={styles.prevFixed} onClick={slideLeft}>←</button>
               <button className={styles.nextFixed} onClick={slideRight}>→</button>
             </div>
-
             <div className={styles.paginationArea}>
               <div className={styles.paginationDots}>
                 {slides.map((_, i) => (
@@ -116,25 +107,26 @@ const MainContent = ({ activePage, cursos = [], onSelect, onFinishExamen }) => {
                   />
                 ))}
               </div>
-              <div className={styles.counterFixed}>
-                {pos + 1} / {totalSlides}
-              </div>
+              <div className={styles.counterFixed}>{pos + 1} / {totalSlides}</div>
             </div>
           </>
         )}
       </section>
 
       <div className={styles.actionRow}>
-      {esUltimaSlide && (
-        <button className={styles.btnAccionFinal} onClick={handleNavegacion}>
-          {esUltimoTema ? "🏆 REALIZAR EXAMEN FINAL" : "SIGUIENTE LECCIÓN ➔"}
-        </button>
-      )}
-    </div>
+        {esUltimaSlide && (
+          <button className={styles.btnAccionFinal} onClick={handleNavegacion}>
+            {activePage.tipo === 'contenido' && 
+             cursoActual.secciones[cursoActual.secciones.findIndex(s => s.id === activePage.id) + 1]?.tipo === 'examen' 
+             ? "IR AL EXAMEN ➔" 
+             : "SIGUIENTE LECCIÓN ➔"}
+          </button>
+        )}
+      </div>
 
       <article className={styles.textContent}>
         <header className={styles.textHeader}>
-          <span className={styles.badge}>{activePage.label}</span>
+          <span className={styles.badge}>{activePage.label || 'Tema'}</span>
           <h2>{activePage.tituloTema}</h2>
         </header>
         <div className={styles.bodyText}>

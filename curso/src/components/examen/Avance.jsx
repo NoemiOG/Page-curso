@@ -1,74 +1,96 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './Avance.module.sass';
 
-const ProgresoCursos = ({ 
-  titulo = "Mi Progreso", 
-  porcentaje = 0, 
-  pendientes = [], 
-  completados = [], 
-  onContinuar 
-}) => {
-  
+const Avance = ({ cursos = [], userAnswers = {}, onContinuar, onResetExamen }) => {
+  const [detalleCursoId, setDetalleCursoId] = useState(null);
+
+  const calcularResultado = (curso) => {
+    const examen = curso.secciones.find(s => s.tipo === 'examen');
+    if (!examen) return null;
+
+    let aciertos = 0;
+    const revision = examen.preguntas.map(pregunta => {
+      const respuestaUsuario = userAnswers[pregunta.id];
+      const respuestaCorrecta = pregunta.respuesta ?? pregunta.respuestaCorrecta;
+      const esCorrecta = respuestaUsuario === respuestaCorrecta;
+      
+      if (esCorrecta) aciertos++;
+
+      return {
+        texto: pregunta.texto,
+        tuRespuesta: pregunta.opciones[respuestaUsuario] || "Sin responder",
+        respuestaCorrecta: pregunta.opciones[respuestaCorrecta],
+        esCorrecta
+      };
+    });
+
+    const porcentaje = Math.round((aciertos / examen.preguntas.length) * 100);
+    return { porcentaje, aprobado: porcentaje >= 70, revision, examenId: examen.id };
+  };
+
   return (
     <div className={styles.progresoContainer}>
-      <h1 className={styles.mainTitle}>{titulo}</h1>
-      
-      <div className={styles.cursoCard}>
-        <div className={styles.headerCard}>
-          <h3>CURSO ACTUAL</h3>
+      <h1 className={styles.mainTitle}>PROGRESO</h1>
+
+      {cursos.map(curso => {
+        const res = calcularResultado(curso);
+        if (!res) return null;
+
+        return (
+          <div key={curso.id} className={styles.cursoCardRevision}>
+            <div className={styles.headerRevision}>
+              <h3>{curso.titulo}</h3>
+              <span className={res.aprobado ? styles.passBadge : styles.failBadge}>
+                {res.porcentaje}% - {res.aprobado ? 'APROBADO' : 'REPROBADO'}
+              </span>
+            </div>
+
+            <div className={styles.botonesAccion}>
+              <button 
+                onClick={() => setDetalleCursoId(detalleCursoId === curso.id ? null : curso.id)}
+                className={styles.btnReview}
+              >
+                {detalleCursoId === curso.id ? "Ocultar Errores" : "Ver Retroalimentación"}
+              </button>
+              
+              <button 
+                onClick={() => onResetExamen(curso.id)} 
+                className={styles.btnRepeat}
+              >
+                Repetir Examen 🔄
+              </button>
+            </div>
+
+            {/* LISTA DE ERRORES / ACIERTOS */}
+            {detalleCursoId === curso.id && (
+              <div className={styles.listaRevision}>
+    {res.revision.map((item, i) => (
+      <div 
+        key={i} 
+        className={item.esCorrecta ? styles.itemCorrecto : styles.itemErroneo}
+      >
+        <p><strong>Pregunta {i + 1}:</strong> {item.texto}</p>
+        
+        <div className={styles.statusBadge}>
+          {item.esCorrecta ? (
+            <span className={styles.txtCorrecto}>● CORRECTA</span>
+          ) : (
+            <span className={styles.txtIncorrecto}>● INCORRECTA</span>
+          )}
         </div>
 
-        <div className={styles.statsLayout}>
-          {/* Círculo de Progreso */}
-          <div className={styles.progressWrapper}>
-            <div 
-              className={styles.circularProgress} 
-              data-percent={porcentaje}
-              style={{ '--p': porcentaje }} // Variable para usar en Sass
-            >
-              <span className={styles.percentText}>{porcentaje}%</span>
-            </div>
-          </div>
-
-          {/* Listado de Temas */}
-          <div className={styles.temasInfo}>
-            <div className={styles.listaGrupo}>
-              <h4>PENDIENTES</h4>
-              <ul>
-                {pendientes.length > 0 
-                  ? pendientes.map((tema, i) => <li key={i} className={styles.itemPendiente}>{tema}</li>)
-                  : <li>¡Todo al día! 🎉</li>
-                }
-              </ul>
-            </div>
-
-            <div className={styles.listaGrupo}>
-              <h4>COMPLETADOS</h4>
-              <ul>
-                {completados.map((tema, i) => (
-                  <li key={i} className={styles.itemCompletado}>✓ {tema}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
+        {/* Ya no mostramos ni 'Tu respuesta' ni 'Respuesta Correcta' */}
       </div>
+    ))}
+  </div>
+            )}
+          </div>
+        );
+      })}
 
-      {/* Espacio reservado para la Gráfica de Pastel (Pie Chart) */}
-      <section className={styles.graficaSeccion}>
-        <div className={styles.placeholderChart}>
-          {/* Aquí integrarás tu componente de Chart.js o SVG */}
-          <p>Gráfica de Avance General</p>
-        </div>
-      </section>
-      
-      <div className={styles.actions}>
-        <button onClick={onContinuar} className={styles.btnContinuar}>
-          CONTINUAR CON LAS PRUEBAS
-        </button>
-      </div>
+      <button onClick={onContinuar} className={styles.btnContinuar}>Volver al Curso</button>
     </div>
   );
 };
 
-export default ProgresoCursos;
+export default Avance;

@@ -44,25 +44,25 @@
             "id": "q1",
             "texto": "Cuando da clases Shrek",
             "opciones": ["No da clases", "Los jueves", "Quien es Shrek", "Los lunes"],
-            "respuesta": 1
+            "respuestaCorrecta": 1
           },
           {
             "id": "q2",
             "texto": "Quien trabaja menos en la oficina",
             "opciones": ["Andoni paseandose", "Randhy en el celular", "Todos trabajan por igual porque somos bien chambeadores, como de que no", "Ambos" ],
-            "respuesta": 2
+            "respuestaCorrecta": 2
           },
           {
             "id": "q3",
             "texto": "Cuanta agua se le pone al arroz",
             "opciones": ["Dos tazas por una de arroz", "Mejor como en la calle", "Hasta que truene", "Arroz con leche?"],
-            "respuesta": 0
+            "respuestaCorrecta": 0
           },
           {
             "id": "q4",
-            "texto": "Que le gusta hacer a Karina",
-            "opciones": ["Trabajar, como a todos", "Organizar convivencias", "Echar chismecito", "Llegar tarde" ],
-            "respuesta": 0
+            "texto": "¿Cuál es la capital de México?",
+            "opciones": ["Guadalajara", "Narnia", "CDMX", "Puebla" ],
+            "respuestaCorrecta": 2
           }
           
     ]
@@ -123,9 +123,9 @@
           },
           {
             "id": "q4",
-            "texto": "Que le gusta hacer a Karina",
-            "opciones": ["Trabajar, como a todos", "Organizar convivencias", "Echar chismecito", "Llegar tarde" ],
-            "respuestaCorrecta": 0
+            "texto": "¿Cuánto es 7 × 8?",
+            "opciones": ["54", "56", "64", "48" ],
+            "respuestaCorrecta": 1
           }
     ]
  }

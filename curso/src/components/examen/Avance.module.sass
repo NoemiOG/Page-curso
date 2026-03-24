@@ -1,4 +1,4 @@
-// Variables de color basadas en tu marca
+// Variables de color
 $color-vino: #61001a
 $color-vino-claro: #8a0b2d
 $color-gris-claro: #e0e0e0
@@ -11,92 +11,125 @@ $color-texto: #333
   color: $color-texto
 
   h1, h2
-    font-family: 'Impact', sans-serif // O una fuente similar cargada
+    font-family: 'Impact', sans-serif
     text-transform: uppercase
     letter-spacing: 1px
     margin-bottom: 2rem
 
-  // Estilo para las tarjetas de curso
   .cursoCard
     display: flex
     align-items: center
-    gap: 4rem
-    margin-bottom: 3rem
-    padding: 1rem
-    border-bottom: 1px solid #eee
+    justify-content: space-between // Para que se estire bien
+    gap: 2rem
+    margin-bottom: 2rem
+    padding: 1.5rem
+    border-radius: 10px
+    background: #fff
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05)
 
-    h3
-      min-width: 150px
-      font-size: 1.5rem
+    .infoPrincipal
+      flex: 1
+      h3
+        font-size: 1.3rem
+        margin: 0
+        color: $color-vino
 
     .stats
       display: flex
       align-items: center
-      gap: 3rem
+      gap: 2rem
 
-      // Círculo de porcentaje usando gradiente cónico
+      // CÍRCULO DINÁMICO
       .circularProgress
-        width: 100px
-        height: 100px
+        width: 80px
+        height: 80px
         border-radius: 50%
-        background: conic-gradient($color-vino 67%, $color-gris-claro 0)
+        // Usamos var(--p) que vendrá desde React (de 0 a 100)
+        background: conic-gradient($color-vino calc(var(--p) * 1%), $color-gris-claro 0)
         display: flex
         align-items: center
         justify-content: center
         position: relative
 
         &::after
-          content: "67%"
+          content: attr(data-pct) // Toma el texto del atributo de React
           position: absolute
-          width: 80px
-          height: 80px
+          width: 65px
+          height: 65px
           background: white
           border-radius: 50%
           display: flex
           align-items: center
           justify-content: center
           font-weight: bold
-          font-size: 1.2rem
-
-      .temasInfo
-        ul
-          list-style: none
-          padding: 0
           font-size: 0.9rem
-          
-          li
-            margin-bottom: 0.5rem
-            
-            strong
-              display: block
-              color: #666
-              font-size: 0.75rem
 
-  // Sección de la gráfica de pastel final
+  // LA GRÁFICA DE PASTEL FINAL (AVANCE GENERAL)
   .avanceGeneral
     margin-top: 4rem
+    padding: 2rem
+    background: #f9f9f9
+    border-radius: 20px
     display: flex
     flex-direction: column
     align-items: center
 
     .pieChart
-      width: 250px
-      height: 250px
+      width: 200px
+      height: 200px
       border-radius: 50%
-      // Simulación de los 3 colores de tu imagen
-      background: conic-gradient($color-vino 0% 57%, #ff3366 57% 83%, #ddd 83% 100%)
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1)
+      // Dinámica: se pinta según el porcentaje general
+      background: conic-gradient($color-vino 0% var(--p-gen), #ff3366 var(--p-gen) 100%)
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15)
+      transition: background 0.5s ease
 
   .btnContinuar
-    margin-top: 3rem
+    display: block
+    margin: 3rem auto
     background-color: $color-vino
     color: white
     border: none
-    padding: 15px 40px
+    padding: 15px 50px
+    font-size: 1.1rem
     font-weight: bold
+    text-transform: uppercase
     cursor: pointer
-    transition: transform 0.2s
+    transition: all 0.3s
     
     &:hover
       background-color: $color-vino-claro
-      transform: scale(1.05)
+      transform: translateY(-3px)
+      box-shadow: 0 5px 15px rgba($color-vino, 0.3)
+
+      .cursoCardRevision
+  border: 2px solid #eee
+  border-radius: 12px
+  margin-bottom: 2rem
+  padding: 1.5rem
+  background: #fff
+
+.statusBadge
+  margin-top: 0.5rem
+  font-weight: bold
+  font-size: 0.85rem
+  text-transform: uppercase
+
+.txtCorrecto
+  color: #27ae60 // Verde para el éxito
+
+.txtIncorrecto
+  color: $color-vino // Tu color vino para el error
+
+.itemErroneo
+  border-left: 5px solid $color-vino
+  background: rgba($color-vino, 0.05)
+  padding: 1rem
+  margin-bottom: 0.5rem
+  border-radius: 4px
+
+.itemCorrecto
+  border-left: 5px solid #27ae60
+  background: rgba(#27ae60, 0.05)
+  padding: 1rem
+  margin-bottom: 0.5rem
+  border-radius: 4px

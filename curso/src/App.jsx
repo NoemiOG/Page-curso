@@ -3,115 +3,136 @@ import Login from './components/login/login';
 import Sidebar from './components/barra/sidebar';
 import MainContent from './components/presentation/MainContent';
 import Welcome from './components/Bienvenida/Bienvenida'; 
+import Avance from './components/examen/Avance'; 
 import styles from './components/App.module.sass';
 import dataCursos from './components/data/cursos.json';
 import logoChakray from './assets/logo.jpeg';
 
 function App() {
-  // --- ESTADOS ---
   const [isLogged, setIsLogged] = useState(false);
-  const [courseSelected, setCourseSelected] = useState(null); // El curso actual (ej: Curso 1)
-  const [currentPage, setCurrentPage] = useState(null);       // La sección/página actual
-  const [viewMode, setViewMode] = useState('course');         // 'course' o 'progress'
+  const [courseSelected, setCourseSelected] = useState(null); 
+  const [currentPage, setCurrentPage] = useState(null);       
+  const [viewMode, setViewMode] = useState('course'); 
+  const [userAnswers, setUserAnswers] = useState({}); 
 
-  // --- MANEJADORES ---
-  const handleLogin = (email) => {
-    console.log("Sesión iniciada:", email);
-    setIsLogged(true);
-  };
+  const handleLogin = (email) => setIsLogged(true);
 
   const handleLogout = () => {
     setIsLogged(false);
     setCourseSelected(null);
     setCurrentPage(null);
+    setUserAnswers({});
+    setViewMode('course');
   };
 
-  // Cuando el usuario elige un curso en la pantalla de Bienvenida
   const handleSelectCurso = (curso) => {
     setCourseSelected(curso);
-    // Por defecto, lo mandamos a la primera sección del curso
     if (curso.secciones && curso.secciones.length > 0) {
       setCurrentPage(curso.secciones[0]);
     }
     setViewMode('course');
   };
 
-  // Cuando el usuario hace clic en el Sidebar para cambiar de tema
   const handleSelectPage = (page) => {
     setCurrentPage(page);
-    setViewMode('course'); // Si estaba en progreso, lo regresa a la vista de contenido
+    setViewMode('course'); 
   };
 
-  // Volver a la pantalla de todos los cursos (Home)
   const handleGoHome = () => {
     setCourseSelected(null);
     setCurrentPage(null);
+    setViewMode('course');
   };
 
-  // --- RENDERIZADO CONDICIONAL ---
-  if (!isLogged) {
-    return <Login onLogin={handleLogin} />;
-  }
+  // Esta es la función clave que recibe las respuestas de SurveyJS
+  const handleFinishExamen = (respuestasDelUsuario) => {
+    setUserAnswers(prev => ({
+      ...prev,
+      ...respuestasDelUsuario
+    }));
+    setViewMode('progress'); 
+  };
 
-  const goToNextSection = () => {
-  // 1. Encontrar el curso actual y el índice de la sección activa
-  const cursoActual = cursos.find(c => c.secciones.some(s => s.id === activePage.id));
-  const indexActual = cursoActual.secciones.findIndex(s => s.id === activePage.id);
+  if (!isLogged) return <Login onLogin={handleLogin} />;
+
+  // Dentro de App.jsx
+const handleResetExamen = (cursoId) => {
+  const curso = dataCursos.find(c => c.id === cursoId);
+  const examen = curso.secciones.find(s => s.tipo === 'examen');
   
-  // 2. Si hay una sección siguiente, la seleccionamos
-  if (indexActual < cursoActual.secciones.length - 1) {
-    const siguiente = cursoActual.secciones[indexActual + 1];
-    onSelect(siguiente); // Esta es la función que cambia el activePage
+  if (examen) {
+    setUserAnswers(prev => {
+      const nuevasRespuestas = { ...prev };
+      // Borramos las respuestas de las preguntas de este examen
+      examen.preguntas.forEach(p => delete nuevasRespuestas[p.id]);
+      return nuevasRespuestas;
+    });
+    
+    // Lo mandamos de vuelta a la página del examen
+    setCurrentPage(examen);
+    setViewMode('course');
   }
 };
 
+// Y lo pasas al componente:
+<Avance 
+  cursos={dataCursos} 
+  userAnswers={userAnswers} 
+  onContinuar={() => setViewMode('course')}
+  onResetExamen={handleResetExamen} // <-- Nueva prop
+/>
+
   return (
     <div className={styles.appContainer}>
-      {/* 1. SIDEBAR: Solo se muestra si hay un curso seleccionado */}
-      {courseSelected && (
+      {courseSelected && viewMode === 'course' && (
         <Sidebar 
           cursos={dataCursos} 
           activeId={currentPage?.id} 
           onSelect={handleSelectPage} 
+          onShowProgress={() => setViewMode('progress')} // <-- Agrega esta línea
         />
       )}
       
       <div className={styles.mainWrapper}>
-        {/* 2. HEADER: Siempre visible tras el login */}
         <header className={styles.header}>
           <div className={styles.headerLeft}>
             <img 
               src={logoChakray} 
               alt="Chakray Logo" 
               className={styles.logo} 
-              onClick={handleGoHome} // Hacer clic en el logo vuelve al inicio
+              onClick={handleGoHome}
               style={{ cursor: 'pointer' }}
             />
           </div>
           <div className={styles.headerRight}>
-            
             <button onClick={handleLogout} className={styles.btnLogout}>
               Cerrar Sesión
             </button>
           </div>
         </header>
         
-        {/* 3. CONTENIDO DINÁMICO */}
         <main className={styles.contentArea}>
-  {courseSelected ? (
-    <MainContent 
-      activePage={currentPage} 
-      cursos={dataCursos}      // <--- FALTABA ESTO
-      onSelect={handleSelectPage} // <--- FALTABA ESTO para que el botón funcione
-      onFinishExamen={() => setViewMode('progress')} 
-    />
-  ) : (
-    <Welcome 
-      cursos={dataCursos} 
-      onSelectCurso={handleSelectCurso} 
-    />
-  )}
-</main>
+          {viewMode === 'progress' ? (
+            <Avance 
+              cursos={dataCursos} 
+              userAnswers={userAnswers}
+              onContinuar={() => setViewMode('course')} 
+            />
+          ) : courseSelected ? (
+            <MainContent 
+              activePage={currentPage} 
+              cursos={dataCursos}
+              onSelect={handleSelectPage}
+              onFinishExamen={handleFinishExamen}
+              userAnswers={userAnswers} // Importante pasar esto para lógica interna
+            />
+          ) : (
+            <Welcome 
+              cursos={dataCursos} 
+              onSelectCurso={handleSelectCurso} 
+            />
+          )}
+        </main>
       </div>
     </div>
   );

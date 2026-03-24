@@ -1,83 +1,63 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Model } from 'survey-core';
+import { Survey } from 'survey-react-ui';
+import "survey-core/survey-core.css";
 import styles from './ExamenPrueba.module.sass';
 
 const ExamenPrueba = ({ data, onFinish }) => {
-  const [respuestas, setRespuestas] = useState({});
-
-  // Verificación de seguridad por si data viene vacío al inicio
-  if (!data || !data.preguntas) return <p>Cargando examen...</p>;
-
-  const manejarCambio = (preguntaId, opcionSeleccionada) => {
-    setRespuestas(prev => ({
-      ...prev,
-      [preguntaId]: opcionSeleccionada
-    }));
+  
+  // 1. Transformamos tu JSON de cursos al formato que entiende SurveyJS
+  const transformarExamenASurvey = (seccionExamen) => {
+    return {
+      title: seccionExamen.tituloTema,
+      description: seccionExamen.instrucciones,
+      showProgressBar: "top",
+      progressBarType: "questions",
+      questionsOrder: "original",
+      pages: [
+        {
+          name: "pagina_unica",
+          elements: seccionExamen.preguntas.map((p) => ({
+            type: "radiogroup",
+            name: p.id.toString(), // El ID de la pregunta
+            title: p.texto,
+            isRequired: true,
+            choices: p.opciones.map((opt, index) => ({
+              value: index, // Guardamos el índice (0, 1, 2) para calificar después
+              text: opt
+            }))
+          }))
+        }
+      ],
+      completedHtml: "<h3>Enviando resultados...</h3>"
+    };
   };
 
-  const manejarEnvio = (e) => {
-    e.preventDefault();
-    
-    // Validar si contestó todo (Opcional pero recomendado)
-    const totalPreguntas = data.preguntas.length;
-    const respondidas = Object.keys(respuestas).length;
+  // 2. Creamos el modelo de la encuesta
+  const surveyJson = transformarExamenASurvey(data);
+  const survey = new Model(surveyJson);
 
-    if (respondidas < totalPreguntas) {
-      if (!window.confirm('No has respondido todas las preguntas. ¿Deseas enviar de todos modos?')) {
-        return;
-      }
+  // 3. Configuramos qué pasa al terminar
+  survey.onComplete.add((sender) => {
+    const respuestas = sender.data; 
+    console.log("Respuestas capturadas:", respuestas);
+    
+    if (onFinish) {
+      onFinish(respuestas);
     }
+  });
 
-    console.log('Respuestas finales:', respuestas);
-    
-    // Ejecutar callback de finalización si existe
-    if (onFinish) onFinish(respuestas);
-  };
+  // 4. Aplicamos un tema sencillo (puedes personalizarlo más luego)
+  survey.applyTheme({
+    cssVariables: {
+      "--sjs-general-backcolor": "rgba(255, 255, 255, 1)",
+      "--sjs-primary-backcolor": "#69200d", // Ajusta al color de tu marca
+    }
+  });
 
   return (
-    <div className={styles.examenContainer}>
-      <header className={styles.header}>
-        <h1 className={styles.titulo}>{data.tituloTema}</h1>
-        <p className={styles.instrucciones}>{data.instrucciones}</p>
-      </header>
-
-      <form onSubmit={manejarEnvio} className={styles.form}>
-        {data.preguntas.map((pregunta, index) => (
-          <fieldset key={pregunta.id} className={styles.preguntaGroup}>
-            <legend className={styles.preguntaTexto}>
-              <strong>{index + 1}.</strong> {pregunta.texto}
-            </legend>
-            
-            <div className={styles.opcionesList}>
-              {pregunta.opciones.map((opcion, i) => {
-                const isSelected = respuestas[pregunta.id] === opcion;
-                return (
-                  <label 
-                    key={`${pregunta.id}-${i}`} 
-                    className={`${styles.opcionLabel} ${isSelected ? styles.selected : ''}`}
-                  >
-                    <input
-                      type="radio"
-                      name={pregunta.id}
-                      value={opcion}
-                      checked={isSelected}
-                      onChange={() => manejarCambio(pregunta.id, opcion)}
-                      className={styles.radioInput}
-                      required // Esto obliga a responder al menos una antes de enviar
-                    />
-                    <span className={styles.opcionTexto}>{opcion}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
-        ))}
-        
-        <div className={styles.footer}>
-          <button type="submit" className={styles.btnEnviar}>
-            FINALIZAR EXAMEN
-          </button>
-        </div>
-      </form>
+    <div className={styles.examenWrapper}>
+      <Survey model={survey} />
     </div>
   );
 };

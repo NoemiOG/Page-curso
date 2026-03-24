@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import styles from './bar.module.sass';
 
-const Sidebar = ({ cursos = [], onSelect, activeId }) => {
+// Añadimos 'onShowProgress' como prop
+const Sidebar = ({ cursos = [], onSelect, activeId, onShowProgress }) => {
   const [openCourseId, setOpenCourseId] = useState(cursos[0]?.id);
-  // Guardamos los IDs de las secciones que el usuario ya clickeó
   const [completedSections, setCompletedSections] = useState([]);
 
   const toggleCourse = (id) => {
@@ -11,7 +11,6 @@ const Sidebar = ({ cursos = [], onSelect, activeId }) => {
   };
 
   const handleSelect = (sec) => {
-    // Si no es un examen, lo marcamos como completado al hacer click
     if (sec.tipo !== 'examen' && !completedSections.includes(sec.id)) {
       setCompletedSections([...completedSections, sec.id]);
     }
@@ -20,16 +19,29 @@ const Sidebar = ({ cursos = [], onSelect, activeId }) => {
 
   return (
     <aside className={styles.bar}>
-      <h2 className={styles.navTitle}>Contenido</h2>
+      <header className={styles.sidebarHeader}>
+        <h2 className={styles.navTitle}>Contenido</h2>
+      </header>
       
+      {/* SECCIÓN DE PROGRESO: Un botón destacado arriba del menú */}
+      <div className={styles.progressNav}>
+        <button 
+          className={`${styles.navBtn} ${styles.progressBtn}`} 
+          onClick={onShowProgress}
+        >
+          <span className={styles.icon}>📊</span>
+          Progreso
+        </button>
+      </div>
+
+      <hr className={styles.separator} />
+
       <nav className={styles.menu}>
         {cursos.map((curso) => {
-          // 1. Filtrar secciones: Todas las de contenido + SOLO el primer examen
           const contenidos = curso.secciones.filter(s => s.tipo !== 'examen');
           const primerExamen = curso.secciones.find(s => s.tipo === 'examen');
           const seccionesAMostrar = [...contenidos, primerExamen].filter(Boolean);
 
-          // 2. Verificar si el curso está completo (excluyendo el examen)
           const idsContenido = contenidos.map(c => c.id);
           const cursoCompletado = idsContenido.every(id => completedSections.includes(id));
 
@@ -61,11 +73,12 @@ const Sidebar = ({ cursos = [], onSelect, activeId }) => {
                             ${bloqueado ? styles.locked : ''}
                           `}
                           disabled={bloqueado}
-                          title={bloqueado ? "Termina el contenido para desbloquear" : ""}
                         >
-                          {sec.label}
-                          {bloqueado && <span className={styles.icon}>🔒</span>}
-                          {!bloqueado && esExamen && <span className={styles.icon}>📝</span>}
+                          <span className={styles.labelWrapper}>
+                            {sec.label}
+                            {bloqueado && <span className={styles.icon}>🔒</span>}
+                            {!bloqueado && esExamen && <span className={styles.icon}>📝</span>}
+                          </span>
                         </button>
                       </li>
                     );
