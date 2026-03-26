@@ -1,5 +1,5 @@
 // Traemos las variables si las tienes en otro archivo
-// @import "../../variables"
+@import ../presentation/variables
 
 .welcomeContainer
   padding: 40px
@@ -67,25 +67,5 @@
     margin-bottom: 20px
 
 .btnEntrar
-  background: #e02424 // Rojo Chakray
-  color: white
-  border: none
-  padding: 10px 25px
-  border-radius: 25px
-  font-weight: 600
-  text-transform: uppercase
-  letter-spacing: 1px
-  transition: background 0.2s
-  margin-top: auto // Empuja el botón al fondo si hay títulos largos
-
-  &:hover
-    background: #b31d1d
-
-// Animación simple para que entre suave
-@keyframes fadeIn
-  from
-    opacity: 0
-    transform: translateY(20px)
-  to
-    opacity: 1
-    transform: translateY(0)
+  @extend .btn-primary
+  width: 100%

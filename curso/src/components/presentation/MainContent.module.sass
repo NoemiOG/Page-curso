@@ -8,6 +8,7 @@
   flex-direction: column
   max-width: 1200px
   margin: 0 auto
+  font-family: $font-main
 
 .screenWrapper
   background-color: #111
@@ -18,7 +19,7 @@
   justify-content: center
   align-items: center
   overflow: hidden
-  border: 8px solid #222
+  border: 2px solid #222
   box-shadow: 0 20px 40px rgba(0,0,0,0.2)
 
 .viewerFrame
@@ -47,39 +48,27 @@
   display: flex
   justify-content: center
   padding: 0 40px
-  margin-top: -25px
+  margin-top: -25px // Esto hace que el botón "flote" sobre el borde del slider
   z-index: 20
+  position: relative
 
 .btnAccionFinal
-  background: linear-gradient(135deg, $color-vino, #800000)
-  color: white
-  border: none
-  padding: 15px 50px
-  border-radius: 50px
-  font-weight: 800
-  cursor: pointer
-  text-transform: uppercase
-  letter-spacing: 1px
-  transition: all 0.4s ease
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3)
-  
-  &:hover
-    background: #a00000
-    transform: translateY(-5px)
-    box-shadow: 0 15px 30px rgba(0,0,0,0.4)
+  @extend .btn-primary // Usamos el placeholder para evitar errores de compilación
+  min-width: 200px     // Le damos un ancho mínimo para que luzca importante
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2)
 
 .textContent
-  margin-top: 40px
+  margin-top: 60px
   color: #333
   padding: 0 10px
   
   h2
     color: $color-vino
     text-transform: uppercase
-    border-bottom: 3px solid $color-vino
     display: inline-block
-    margin-bottom: 20px
-    font-size: 1.8rem
+    margin-bottom: 10px
+    font-size: 1.1rem
+    font-weight: 700
 
   p
     line-height: 1.8
@@ -89,16 +78,26 @@
 .controlesFijos
   position: absolute
   width: 100%
+  top: 50%
+  transform: translateY(-50%)
   display: flex
   justify-content: space-between
   padding: 0 20px
-  pointer-events: none
+  pointer-events: none // Importante para que no bloquee el click al slider
   
   button
     pointer-events: auto
     background: rgba(0,0,0,0.5)
     color: white
     border: none
-    padding: 10px 15px
+    width: 45px
+    height: 45px
     cursor: pointer
-    border-radius: 5px
+    border-radius: 50% // Los hacemos circulares para un look más moderno
+    transition: background 0.3s
+    display: flex
+    align-items: center
+    justify-content: center
+
+    &:hover
+      background: rgba(225, 31, 38, 0.8) // Usamos el rojo en el hover

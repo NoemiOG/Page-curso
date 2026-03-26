@@ -1,7 +1,55 @@
 // variables.sass
-$color-vino: #61001a
-$color-vino-light: #800000
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap')
+
+$color-vino: #49494A
+$color-vino-light: #49494A
 $color-white: #ffffff
 $color-bg-light: #f4f4f4
 $border-radius-lg: 40px
-$font-main: 'Arial', sans-serif
+$font-main: 'Roboto', medium
+
+
+// Colores base
+$color-vino-dark: #61001a
+$color-gris-dark: #49494A
+$color-rojo-bright: #E11F26
+$color-gris-light: #EDEDED
+$color-gris: #878787
+
+// Configuración del Botón Genérico
+$btn-bg: $color-gris-dark
+$btn-bg-hover: $color-rojo-bright
+$btn-color: $color-gris-light
+$btn-padding: 20px
+$btn-radius: 10px
+$btn-font-weight: bold
+$btn-transition: background 0.3s
+
+// Escala de tamaños (puedes usar px o rem)
+$font-size-xs: 12px
+$font-size-sm: 14px
+$font-size-base: 16px    // Tamaño estándar para párrafos
+$font-size-md: 18px
+$font-size-lg: 24px
+$btn-font-size: $font-size-sm
+
+.btn-primary
+    width: auto
+    padding: $btn-padding
+    background-color: $btn-bg
+    color: $btn-color
+    border: none
+    border-radius: $btn-radius
+    font-weight: $btn-font-weight
+    font-main: 'Roboto'
+    font-size: $font-size-md
+    cursor: pointer
+    transition: $btn-transition
+    display: inline-block
+    text-align: center
+
+    &:hover
+        background-color: $btn-bg-hover
+        background: $color-rojo-bright
+        transform: translateY(-5px)
+        box-shadow: 0 5px 15px rgba(0,0,0,0.4)

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styles from './login.module.sass';
-import logoChakray from '../../assets/logo.jpeg';
+import logoChakray from '../../assets/chakraylogo.png';
 
 
 const Login = ({ onLogin }) => {
@@ -47,7 +47,7 @@ const Login = ({ onLogin }) => {
           {!isValid && <p className={styles.errorText}>Email no válido</p>}
 
           <button type="submit" className={styles.btnAcceder}>
-            Acceder
+            INGRESAR
           </button>
         </form>
       </div>

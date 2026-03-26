@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ExamenViewer from '../examen/ExamenPrueba'; 
 import ProgresoCursos from '../examen/Avance';
 import styles from './MainContent.module.sass';
+import { FaArrowCircleLeft } from "react-icons/fa";
 
 const MainContent = ({ activePage, cursos = [], onSelect, onFinishExamen, userAnswers }) => {
   const [mostrarProgreso, setMostrarProgreso] = useState(false);
@@ -94,7 +95,7 @@ const MainContent = ({ activePage, cursos = [], onSelect, onFinishExamen, userAn
         {totalSlides > 1 && (
           <>
             <div className={styles.controlesFijos}>
-              <button className={styles.prevFixed} onClick={slideLeft}>←</button>
+              <button className={styles.prevFixed} onClick={slideLeft}><FaArrowCircleLeft /></button>
               <button className={styles.nextFixed} onClick={slideRight}>→</button>
             </div>
             <div className={styles.paginationArea}>
@@ -107,7 +108,7 @@ const MainContent = ({ activePage, cursos = [], onSelect, onFinishExamen, userAn
                   />
                 ))}
               </div>
-              <div className={styles.counterFixed}>{pos + 1} / {totalSlides}</div>
+              
             </div>
           </>
         )}

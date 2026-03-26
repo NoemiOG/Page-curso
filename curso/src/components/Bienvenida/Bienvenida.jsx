@@ -16,7 +16,7 @@ const Bienvenido = ({ cursos, onSelectCurso }) => {
             <div className={styles.icon}>📖</div>
             <h3>{curso.titulo}</h3>
             <p>{curso.secciones.length} lecciones disponibles</p>
-            <button className={styles.btnEntrar}>Comenzar</button>
+            <button className={styles.btnEntrar}>COMENZAR</button>
           </div>
         ))}
       </div>

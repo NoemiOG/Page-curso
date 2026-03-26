@@ -6,7 +6,7 @@ import Welcome from './components/Bienvenida/Bienvenida';
 import Avance from './components/examen/Avance'; 
 import styles from './components/App.module.sass';
 import dataCursos from './components/data/cursos.json';
-import logoChakray from './assets/logo.jpeg';
+import logoChakray from './assets/logo.png';
 
 function App() {
   const [isLogged, setIsLogged] = useState(false);
@@ -106,7 +106,7 @@ const handleResetExamen = (cursoId) => {
           </div>
           <div className={styles.headerRight}>
             <button onClick={handleLogout} className={styles.btnLogout}>
-              Cerrar Sesión
+              CERRAR SESIÓN
             </button>
           </div>
         </header>
