@@ -1,0 +1,96 @@
+@import ../presentation/variables
+
+.perfilContainer
+  padding: 3rem 2rem
+  max-width: 800px
+  margin: 0 auto
+  animation: fadeIn 0.5s ease
+  font-family: $font-main
+
+.perfilHeader
+  display: flex
+  align-items: center
+  gap: 2rem
+  margin-bottom: 4rem
+  padding-bottom: 2.5rem
+  border-bottom: 1px solid $color-smokey-white
+
+  .avatar
+    width: 100px
+    height: 100px
+    background-color: $color-rojo-bright
+    color: $color-white
+    border-radius: 50%
+    display: flex
+    align-items: center
+    justify-content: center
+    font-size: 3rem
+    font-family: $font-bold
+    text-transform: uppercase
+    box-shadow: 0 10px 20px rgba($color-rojo-bright, 0.3)
+    overflow: hidden
+
+    img
+      width: 100%
+      height: 100%
+      object-fit: cover
+
+  .info
+    h2
+      font-size: 2rem
+      margin: 0
+      color: $color-midnight
+      font-family: $font-bold
+    p
+      color: $color-gris
+      font-size: 1.1rem
+      margin: 5px 0 0
+
+.statsGrid
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))
+  gap: 2rem
+  margin-bottom: 4rem
+
+.statCard
+  background: $color-white
+  padding: 2rem
+  border-radius: 15px
+  text-align: center
+  border-top: 5px solid $color-rojo-bright // Cambiado a borde superior para variar el estilo
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05)
+  transition: transform 0.3s ease
+
+  &:hover
+    transform: translateY(-5px)
+  
+  .statLabel
+    font-size: 0.85rem
+    color: $color-gris
+    text-transform: uppercase
+    letter-spacing: 1.5px
+    font-weight: 700
+
+  .statValue
+    font-size: 3rem
+    font-weight: 900
+    margin: 10px 0 0
+    color: $color-gris-dark
+    font-family: $font-bold
+
+.footer
+  display: flex
+  justify-content: center
+
+.btnVolver
+  @extend .btn-primary
+  padding: 15px 40px
+  font-size: $font-size-md
+
+@keyframes fadeIn
+  from
+    opacity: 0
+    transform: translateY(15px)
+  to
+    opacity: 1
+    transform: translateY(0)

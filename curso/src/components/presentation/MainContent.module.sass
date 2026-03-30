@@ -3,24 +3,23 @@
 .container
   flex: 1
   padding: 2rem
-  background-color: $color-bg-light
+  background-color: $color-gris-light
   display: flex
   flex-direction: column
-  max-width: 1200px
-  margin: 0 auto
+  min-height: 100vh // Asegura que cubra el alto
   font-family: $font-main
 
 .screenWrapper
-  background-color: #111
-  border-radius: $border-radius-lg
+  background-color: #000 // Fondo negro puro para el slider
+  border-radius: 20px    // Corregido: antes tenías una variable de color aquí
   position: relative
   aspect-ratio: 16 / 9
   display: flex
   justify-content: center
   align-items: center
   overflow: hidden
-  border: 2px solid #222
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2)
+  border: 2px solid $color-gris
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4)
 
 .viewerFrame
   width: 100%
@@ -40,40 +39,63 @@
   flex-direction: column
   align-items: center
   justify-content: center
-  color: white
-  padding: 2rem
+  color: $color-white
+  padding: 3rem
   text-align: center
+  
+  h2
+    font-size: 2.5rem
+    font-family: $font-bold
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.5)
 
 .actionRow
   display: flex
   justify-content: center
-  padding: 0 40px
-  margin-top: -25px // Esto hace que el botón "flote" sobre el borde del slider
+  margin-top: -25px 
   z-index: 20
   position: relative
 
 .btnAccionFinal
-  @extend .btn-primary // Usamos el placeholder para evitar errores de compilación
-  min-width: 200px     // Le damos un ancho mínimo para que luzca importante
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2)
+  @extend .btn-primary 
+  min-width: 250px
+  padding: 15px 30px
+  font-size: $font-size-md
+  box-shadow: 0 10px 20px rgba($color-rojo-bright, 0.3)
 
 .textContent
-  margin-top: 60px
-  color: #333
-  padding: 0 10px
+  margin-top: 50px
+  color: $color-smokey-white // Cambiado para que sea legible sobre midnight
+  padding: 0 20px
   
-  h2
-    color: $color-vino
-    text-transform: uppercase
-    display: inline-block
-    margin-bottom: 10px
-    font-size: 1.1rem
-    font-weight: 700
+  .textHeader
+    border-bottom: 1px solid rgba($color-white, 0.1)
+    margin-bottom: 20px
+    padding-bottom: 10px
 
-  p
-    line-height: 1.8
-    font-size: 1.1rem
-    text-align: justify
+    .badge
+      background-color: $color-rojo-bright
+      color: $color-white
+      padding: 15px 30px
+      border-radius: 20px
+      font-size: 1.7rem
+      font-weight: bold
+      text-transform: uppercase
+      margin-bottom: 10px
+      display: inline-block
+
+    h2
+      color: $color-white
+      text-transform: uppercase
+      font-size: 1.4rem
+      font-weight: 700
+      margin: 0
+
+  .bodyText
+    p
+      line-height: 1.8
+      font-size: 1.1rem
+      color: $color-gris-dark// Texto suave para lectura larga
+      text-align: justify
 
 .controlesFijos
   position: absolute
@@ -83,21 +105,48 @@
   display: flex
   justify-content: space-between
   padding: 0 20px
-  pointer-events: none // Importante para que no bloquee el click al slider
+  pointer-events: none
   
   button
     pointer-events: auto
-    background: rgba(0,0,0,0.5)
-    color: white
-    border: none
-    width: 45px
-    height: 45px
+    background: rgba($color-midnight, 0.6)
+    color: $color-white
+    border: 1px solid rgba($color-white, 0.2)
+    width: 50px
+    height: 50px
     cursor: pointer
-    border-radius: 50% // Los hacemos circulares para un look más moderno
-    transition: background 0.3s
+    border-radius: 50%
+    transition: all 0.3s ease
     display: flex
     align-items: center
     justify-content: center
+    font-size: 1.2rem
 
     &:hover
-      background: rgba(225, 31, 38, 0.8) // Usamos el rojo en el hover
+      background: $color-rojo-bright
+      transform: scale(1.1)
+      border-color: transparent
+
+.paginationArea
+  position: absolute
+  bottom: 20px
+  width: 100%
+  display: flex
+  justify-content: center
+
+.paginationDots
+  display: flex
+  gap: 8px
+  
+  .dot
+    width: 10px
+    height: 10px
+    border-radius: 50%
+    background: rgba($color-white, 0.3)
+    cursor: pointer
+    transition: all 0.3s
+    
+    &.active
+      background: $color-rojo-bright
+      width: 25px // Efecto de pastilla para el activo
+      border-radius: 5px

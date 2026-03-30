@@ -1,135 +1,146 @@
-// Variables de color
-$color-vino: #61001a
-$color-vino-claro: #E11F26
-$color-gris-claro: #e0e0e0
-$color-texto: #333
+@import ../presentation/variables
+
+// Colores específicos para feedback (puedes moverlos a variables.sass si gustas)
+$color-success: #27ae60
+$color-fail: $color-rojo-bright
 
 .progresoContainer
   padding: 3rem
   max-width: 1000px
   margin: 0 auto
-  color: $color-texto
+  font-family: $font-main
+  color: $color-midnight
 
-  h1, h2
-    font-family: 'Impact', sans-serif
+  .mainTitle
+    font-family: $font-bold
+    text-align: center
+    font-size: 2.2rem
+    margin-bottom: 3rem
+    color: $color-midnight
     text-transform: uppercase
-    letter-spacing: 1px
-    margin-bottom: 2rem
+    border-bottom: 4px solid $color-rojo-bright
+    display: inline-block
+    width: 100%
 
-  .cursoCard
+.cursoCardRevision
+  border: 1px solid $color-smokey-white
+  border-radius: 15px
+  margin-bottom: 2rem
+  padding: 2rem
+  background: $color-white
+  box-shadow: 0 5px 20px rgba(0,0,0,0.05)
+  transition: transform 0.3s ease
+
+  .headerRevision
     display: flex
+    justify-content: space-between
     align-items: center
-    justify-content: space-between // Para que se estire bien
-    gap: 2rem
-    margin-bottom: 2rem
-    padding: 1.5rem
-    border-radius: 10px
-    background: #fff
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05)
+    margin-bottom: 1.5rem
 
-    .infoPrincipal
-      flex: 1
+    .titleGroup
       h3
-        font-size: 1.3rem
+        font-size: 1.4rem
+        color: $color-midnight
         margin: 0
-        color: $color-vino
+      
+      .statusPass, .statusFail
+        font-size: 0.8rem
+        font-weight: bold
+        text-transform: uppercase
+        padding: 4px 10px
+        border-radius: 5px
+        display: inline-block
+        margin-top: 5px
 
-    .stats
-      display: flex
-      align-items: center
-      gap: 2rem
+      .statusPass
+        background-color: rgba($color-success, 0.1)
+        color: $color-success
+      
+      .statusFail
+        background-color: rgba($color-fail, 0.1)
+        color: $color-fail
 
-      // CÍRCULO DINÁMICO
-      .circularProgress
-        width: 80px
-        height: 80px
-        border-radius: 50%
-        // Usamos var(--p) que vendrá desde React (de 0 a 100)
-        background: conic-gradient($color-vino calc(var(--p) * 1%), $color-gris-claro 0)
-        display: flex
-        align-items: center
-        justify-content: center
-        position: relative
+    .porcentajeBadge
+      font-size: 2.5rem
+      font-weight: 900
+      font-family: $font-bold
 
-        &::after
-          content: attr(data-pct) // Toma el texto del atributo de React
-          position: absolute
-          width: 65px
-          height: 65px
-          background: white
-          border-radius: 50%
-          display: flex
-          align-items: center
-          justify-content: center
-          font-weight: bold
-          font-size: 0.9rem
+      .txtPass
+        color: $color-success
+      .txtFail
+        color: $color-fail
 
-  // LA GRÁFICA DE PASTEL FINAL (AVANCE GENERAL)
-  .avanceGeneral
-    margin-top: 4rem
-    padding: 2rem
-    background: #f9f9f9
-    border-radius: 20px
-    display: flex
-    flex-direction: column
-    align-items: center
+.botonesAccion
+  display: flex
+  gap: 15px
+  border-top: 1px solid $color-smokey-white
+  padding-top: 1.5rem
 
-    .pieChart
-      width: 200px
-      height: 200px
-      border-radius: 50%
-      // Dinámica: se pinta según el porcentaje general
-      background: conic-gradient($color-vino 0% var(--p-gen), #ff3366 var(--p-gen) 100%)
-      box-shadow: 0 10px 20px rgba(0,0,0,0.15)
-      transition: background 0.5s ease
-
-  .btnContinuar
-    display: block
-    margin: 3rem auto
-    background-color: $color-vino
-    color: white
-    border: none
-    padding: 15px 50px
-    font-size: 1.1rem
+  .btnReview
+    background: transparent
+    color: $color-gris-dark
+    border: 2px solid $color-gris-dark
+    padding: 10px 20px
+    border-radius: 8px
     font-weight: bold
-    text-transform: uppercase
     cursor: pointer
-    transition: all 0.3s
+    transition: all 0.3s ease
     
     &:hover
-      background-color: $color-vino-claro
-      transform: translateY(-3px)
-      box-shadow: 0 5px 15px rgba($color-vino, 0.3)
+      background: $color-gris-dark
+      color: $color-white
 
-      .cursoCardRevision
-  border: 2px solid #eee
-  border-radius: 12px
-  margin-bottom: 2rem
-  padding: 1.5rem
-  background: #fff
+  .btnRepeat
+    @extend .btn-primary
+    padding: 10px 20px
+    font-size: $font-size-sm
+    
+    &:disabled
+      background-color: $color-gris-light
+      color: $color-gris
+      cursor: not-allowed
+      transform: none
+      box-shadow: none
 
-.statusBadge
-  margin-top: 0.5rem
-  font-weight: bold
-  font-size: 0.85rem
-  text-transform: uppercase
-
-.txtCorrecto
-  color: #27ae60 // Verde para el éxito
-
-.txtIncorrecto
-  color: $color-vino // Tu color vino para el error
-
-.itemErroneo
-  border-left: 5px solid $color-vino
-  background: rgba($color-vino, 0.05)
+.listaRevision
+  margin-top: 2rem
   padding: 1rem
-  margin-bottom: 0.5rem
-  border-radius: 4px
+  background-color: $color-gris-light
+  border-radius: 10px
+  animation: fadeIn 0.4s ease
+
+.itemCorrecto, .itemErroneo
+  padding: 1.2rem
+  margin-bottom: 1rem
+  border-radius: 8px
+  border-left: 6px solid
+  
+  .preguntaTexto
+    margin-bottom: 10px
+    color: $color-midnight
+
+  .respuestasComparadas
+    font-size: 0.95rem
+    p span
+      font-weight: bold
+      color: $color-gris-dark
 
 .itemCorrecto
-  border-left: 5px solid #27ae60
-  background: rgba(#27ae60, 0.05)
-  padding: 1rem
-  margin-bottom: 0.5rem
-  border-radius: 4px
+  border-left-color: $color-success
+  background-color: rgba($color-success, 0.05)
+
+.itemErroneo
+  border-left-color: $color-fail
+  background-color: rgba($color-fail, 0.05)
+  
+  .solucion
+    color: $color-fail
+    margin-top: 5px
+
+.footerAvance
+  text-align: center
+  margin-top: 4rem
+
+  .btnContinuar
+    @extend .btn-primary
+    padding: 15px 40px

@@ -4,54 +4,68 @@ import { Survey } from 'survey-react-ui';
 import "survey-core/survey-core.css";
 import styles from './ExamenPrueba.module.sass';
 
-const ExamenPrueba = ({ data, onFinish }) => {
+// AGREGAMOS cursoId a los props (viene desde MainContent)
+const ExamenPrueba = ({ data, cursoId, onFinish }) => {
   
-  // 1. Transformamos tu JSON de cursos al formato que entiende SurveyJS
   const transformarExamenASurvey = (seccionExamen) => {
     return {
-      title: seccionExamen.tituloTema,
-      description: seccionExamen.instrucciones,
+      title: seccionExamen.tituloTema || "Evaluación",
+      description: seccionExamen.instrucciones || "Selecciona las respuestas correctas.",
       showProgressBar: "top",
       progressBarType: "questions",
-      questionsOrder: "original",
+      completeText: "Finalizar y Enviar",
       pages: [
         {
           name: "pagina_unica",
           elements: seccionExamen.preguntas.map((p) => ({
-            type: "radiogroup",
-            name: p.id.toString(), // El ID de la pregunta
+            type: p.esMultiple ? "checkbox" : "radiogroup", 
+            name: `${p.id}`, 
             title: p.texto,
             isRequired: true,
             choices: p.opciones.map((opt, index) => ({
-              value: index, // Guardamos el índice (0, 1, 2) para calificar después
-              text: opt
+              value: index, 
+              text: opt    
             }))
           }))
         }
       ],
-      completedHtml: "<h3>Enviando resultados...</h3>"
+      completedHtml: "<h3>Procesando tus resultados...</h3>"
     };
   };
 
-  // 2. Creamos el modelo de la encuesta
   const surveyJson = transformarExamenASurvey(data);
   const survey = new Model(surveyJson);
 
-  // 3. Configuramos qué pasa al terminar
+  // --- LÓGICA DE ENVÍO CORREGIDA ---
   survey.onComplete.add((sender) => {
-    const respuestas = sender.data; 
-    console.log("Respuestas capturadas:", respuestas);
-    
+    const dataRaw = sender.data; 
+    const respuestasFormateadas = {};
+
+    // IMPORTANTE: Usamos el cursoId que viene por props
+    const idParaLlave = cursoId || "1"; // Fallback por si acaso
+
+    Object.keys(dataRaw).forEach(preguntaId => {
+      // Ahora sí: "1_q1", "2_q1", etc.
+      const llaveCompuesta = `${idParaLlave}_${preguntaId}`;
+      respuestasFormateadas[llaveCompuesta] = dataRaw[preguntaId];
+    });
+
+    console.log("Datos enviados al App:", respuestasFormateadas);
+
     if (onFinish) {
-      onFinish(respuestas);
+      onFinish(respuestasFormateadas);
     }
   });
 
-  // 4. Aplicamos un tema sencillo (puedes personalizarlo más luego)
   survey.applyTheme({
     cssVariables: {
-      "--sjs-general-backcolor": "rgba(255, 255, 255, 1)",
-      "--sjs-primary-backcolor": "#69200d", // Ajusta al color de tu marca
+      "--sjs-general-backcolor": "rgba(255, 255, 255, 0.05)",
+      "--sjs-general-forecolor": "#222020",
+      "--sjs-primary-backcolor": "#E11F26",
+      "--sjs-primary-backcolor-light": "rgba(225, 31, 38, 0.1)",
+      "--sjs-primary-backcolor-hover": "#ff3131",
+      "--sjs-article-font-main-color": "#241111",
+      "--sjs-question-title-color": "#554242"
     }
   });
 

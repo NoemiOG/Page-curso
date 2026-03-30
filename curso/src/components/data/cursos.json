@@ -104,32 +104,41 @@
         "instrucciones": "Instrucciones del examen. Tiempo, evaluación, no comer, no distracciones. Si repruebas mejor ya ni vengas, buscate otra chamba.",
         "preguntas": [
           {
-            "id": "q1",
+            "id": "qu1",
             "texto": "De que color es el caballo blanco de Napoleon",
             "opciones": ["No se", "Ingatu", "Blanco", "Morado"],
-            "respuestaCorrecta": 1
+            "respuestaCorrecta": 2
           },
           {
-            "id": "q2",
+            "id": "qu2",
             "texto": "Quien es el papucho de la ofi",
             "opciones": ["Andoni", "Andres, que el señor lo tenga en su gloria", "No hay", "Santo padre" ],
             "respuestaCorrecta": 2
           },
           {
-            "id": "q3",
+            "id": "qu3",
             "texto": "Cuanta agua se le pone al arroz",
             "opciones": ["Dos tazas por una de arroz", "Mejor como en la calle", "Hasta que truene", "Arroz con leche?"],
             "respuestaCorrecta": 0
           },
           {
-            "id": "q4",
+            "id": "qu4",
             "texto": "¿Cuánto es 7 × 8?",
             "opciones": ["54", "56", "64", "48" ],
             "respuestaCorrecta": 1
-          }
+          },
+          {
+            "id": "qu5",
+            "texto": "¿Qué tecnologías usamos en este proyecto?",
+            "esMultiple": true,
+            "opciones": ["React", "PHP", "Sass", "Java"],
+            "respuestaCorrecta": [0, 2] 
+}
     ]
  }
-    ] 
+    ]
+    
+    
     
   }
 ]

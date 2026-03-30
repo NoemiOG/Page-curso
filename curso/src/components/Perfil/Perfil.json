@@ -1,0 +1,11 @@
+{
+  "id": "u1",
+  "nombre": "Juan Pérez",
+  "email": "juan.perez@chakray.com",
+  "rol": "Estudiante",
+  "avatar": "JP",
+  "stats": {
+    "cursosIniciados": 3,
+    "promedioGeneral": 88
+  }
+}

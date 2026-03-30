@@ -1,100 +1,125 @@
 @import ../presentation/variables
 
 .bar
-  width: 280px // Un poco más de aire
-  background-color: $color-vino
+  width: 280px
+  background-color: $color-gris-dark
   min-height: 100vh
   display: flex
   flex-direction: column
   box-shadow: 4px 0 10px rgba(0,0,0,0.1)
+  font-family: $font-main
+
+.sidebarHeader
+  padding: 20px 0
 
 .navTitle
   color: $color-white
   text-align: center
-  padding: 30px 0 20px
+  padding: 10px 0
   text-transform: uppercase
-  font-size: 0.9rem
+  font-size: 0.8rem
   letter-spacing: 2px
-  opacity: 0.7
+  opacity: 0.9
+  font-family: $font-bold
+
+.progressNav
+  padding: 0 20px
+  margin-bottom: 15px
+
+.progressBtn
+  @extend .btn-primary // Reutilizamos tu lógica de botones
+  width: 100%
+  background-color: rgba($color-white, 0.2) // 
+  color: $color-white
+  border: 1px light rgba($color-white, 0.3)
+  padding: 10px
+  font-size: $font-size-sm
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: 10px
+
+  &:hover
+    background-color: $color-midnight
+    border-color: $color-midnight
+    transform: translateY(-2px)
+
+.separator
+  border: 0
+  border-top: 1px solid rgba($color-white, 0.2)
+  margin: 0 20px 20px
 
 .courseGroup
-  margin-bottom: 25px
+  margin-bottom: 10px
 
 .courseBanner
   background-color: $color-white
-  color: #1a1a1a
+  color: $color-midnight
   padding: 12px 20px
   font-weight: 800
-  font-size: 0.85rem
+  font-size: 0.95rem
+  border: none
   border-radius: 0 50px 50px 0
   width: 90%
-  margin-bottom: 12px
-  box-shadow: 3px 3px 8px rgba(0,0,0,0.2)
+  cursor: pointer
   text-transform: uppercase
+  display: flex
+  justify-content: space-between
+  align-items: center
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.1)
+  transition: all 0.3s ease
+
+  &:hover
+    width: 95%
+    background-color: $color-smokey-white
+
+  .arrow
+    transition: transform 0.3s ease
+    font-size: 0.7rem
+    &.open
+      transform: rotate(180deg)
 
 .linksList
   list-style: none
-  padding: 0
+  padding: 5px 0
   margin: 0
 
 .navBtn
   background: none
   border: none
-  color: rgba(255, 255, 255, 0.8)
+  color: rgba($color-white, 0.8)
   display: block
   width: 100%
   text-align: left
-  padding: 10px 30px
+  padding: 12px 30px
   cursor: pointer
-  font-size: 0.95rem
+  font-size: 0.9rem
   transition: all 0.2s ease
   position: relative
 
-  &:hover
+  &:hover:not(.locked)
     color: $color-white
-    background-color: #878787
-    padding-left: 35px // Pequeño efecto de desplazamiento
+    background-color: rgba($color-midnight, 0.2)
+    padding-left: 35px
 
   &.active
     color: $color-white
-    background-color: #878787
+    background-color: $color-midnight
     font-weight: bold
     
-    // Indicador lateral para el item activo
     &::before
       content: ''
       position: absolute
       left: 0
       top: 0
       bottom: 0
-      width: 4px
+      width: 6px
       background-color: $color-white
 
 .locked
   opacity: 0.5
   cursor: not-allowed
-  filter: grayscale(1)
   
 .icon
   margin-left: 8px
-  font-size: 0.8rem
-
-  .progressNav
-  padding: 1rem
-  
-.progressBtn
-  background-color: rgba(33, 150, 243, 0.1) // Un azul suave de fondo
-  border: 1px solid #49494A
-  color: #c4c4c4
-  font-weight: bold
-  margin-bottom: 0.5rem
-  transition: all 0.3s ease
-
-  &:hover
-    background-color: #a07e6f
-    color: white
-
-.separator
-  border: 0
-  border-top: 1px solid #eee
-  margin: 0 1rem 1rem 1rem
+  font-size: 0.9rem
