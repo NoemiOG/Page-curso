@@ -1,94 +1,74 @@
-import { useState } from 'react';
+import React from 'react';
 import styles from './bar.module.sass';
+import { FaBookOpen, FaFileAlt, FaLock } from "react-icons/fa";
 
-// Añadimos 'onShowProgress' como prop
-const Sidebar = ({ cursos = [], onSelect, activeId, onShowProgress }) => {
-  const [openCourseId, setOpenCourseId] = useState(cursos[0]?.id);
-  const [completedSections, setCompletedSections] = useState([]);
+const Sidebar = ({ cursoActual, activeId, onSelect, onShowProgress, userAnswers = {} }) => {
+  if (!cursoActual) return null;
 
-  const toggleCourse = (id) => {
-    setOpenCourseId(openCourseId === id ? null : id);
+  // 1. Cálculo del puntaje real para el estado del curso
+  const calcularEstadoExamen = (curso, respuestas) => {
+    const examen = curso.secciones?.find(s => s.tipo === 'examen');
+    if (!examen) return { porcentaje: 0, aprobado: false };
+
+    let aciertos = 0;
+    examen.preguntas.forEach(p => {
+      const respUser = respuestas[`${curso.id}_${p.id}`];
+      // Validación flexible (doble igual para strings/numbers)
+      if (respUser == p.respuestaCorrecta) aciertos++;
+    });
+
+    const porcentaje = Math.round((aciertos / examen.preguntas.length) * 100);
+    return { porcentaje, aprobado: porcentaje >= 80 };
   };
 
-  const handleSelect = (sec) => {
-    if (sec.tipo !== 'examen' && !completedSections.includes(sec.id)) {
-      setCompletedSections([...completedSections, sec.id]);
-    }
-    onSelect(sec);
-  };
+  const { porcentaje, aprobado } = calcularEstadoExamen(cursoActual, userAnswers);
+
+  // 2. Lógica de bloqueo del examen
+  // Se desbloquea si: ya está aprobado O si el usuario está viendo la última lección de contenido
+  const lecciones = cursoActual.secciones.filter(s => s.tipo !== 'examen');
+  const ultimaLeccionId = lecciones[lecciones.length - 1]?.id;
+  
+  // El examen se habilita solo cuando el usuario llega a la última lección de texto
+  const contenidoRevisado = activeId === ultimaLeccionId || aprobado;
 
   return (
-    <aside className={styles.bar}>
-      <header className={styles.sidebarHeader}>
-        <h2 className={styles.navTitle}>Contenido</h2>
-      </header>
-      
-      {/* SECCIÓN DE PROGRESO: Un botón destacado arriba del menú */}
-      <div className={styles.progressNav}>
-        <button 
-          className={`${styles.navBtn} ${styles.progressBtn}`} 
-          onClick={onShowProgress}
-        >
-          <span className={styles.icon}>📊</span>
-          Progreso
-        </button>
+    <aside className={styles.sidebar}>
+      <div className={styles.sidebarHeader}>
+        <h2>{cursoActual.titulo}</h2>
       </div>
 
-      <hr className={styles.separator} />
+      <nav className={styles.navLista}>
+        {cursoActual.secciones.map((seccion) => {
+          const esExamen = seccion.tipo === 'examen';
+          
+          // REGLA: Si ya aprobó, el examen desaparece de la lista
+          if (esExamen && aprobado) return null;
 
-      <nav className={styles.menu}>
-        {cursos.map((curso) => {
-          const contenidos = curso.secciones.filter(s => s.tipo !== 'examen');
-          const primerExamen = curso.secciones.find(s => s.tipo === 'examen');
-          const seccionesAMostrar = [...contenidos, primerExamen].filter(Boolean);
-
-          const idsContenido = contenidos.map(c => c.id);
-          const cursoCompletado = idsContenido.every(id => completedSections.includes(id));
+          // Bloqueo visual y funcional si no ha llegado al final del contenido
+          const bloqueado = esExamen && !contenidoRevisado;
 
           return (
-            <div key={curso.id} className={styles.courseGroup}>
-              <button 
-                className={styles.courseBanner} 
-                onClick={() => toggleCourse(curso.id)}
-              >
-                {curso.titulo}
-                <span className={`${styles.arrow} ${openCourseId === curso.id ? styles.open : ''}`}>
-                  ▼ 
-                </span>
-              </button>
-              
-              {openCourseId === curso.id && (
-                <ul className={styles.linksList}>
-                  {seccionesAMostrar.map((sec) => {
-                    const esExamen = sec.tipo === 'examen';
-                    const bloqueado = esExamen && !cursoCompletado;
-
-                    return (
-                      <li key={sec.id}>
-                        <button
-                          onClick={() => !bloqueado && handleSelect(sec)}
-                          className={`
-                            ${styles.navBtn} 
-                            ${activeId === sec.id ? styles.active : ''} 
-                            ${bloqueado ? styles.locked : ''}
-                          `}
-                          disabled={bloqueado}
-                        >
-                          <span className={styles.labelWrapper}>
-                            {sec.label}
-                            {bloqueado && <span className={styles.icon}>🔒</span>}
-                            {!bloqueado && esExamen && <span className={styles.icon}>📝</span>}
-                          </span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
+            <button
+              key={seccion.id}
+              disabled={bloqueado}
+              className={`${styles.navItem} ${activeId === seccion.id ? styles.active : ''} ${bloqueado ? styles.locked : ''}`}
+              onClick={() => !bloqueado && onSelect(seccion)}
+            >
+              <span className={styles.itemLabel}>
+                {bloqueado ? <FaLock /> : (esExamen ? <FaFileAlt /> : <FaBookOpen />)}
+                {seccion.label || seccion.tituloTema}
+              </span>
+            </button>
           );
         })}
       </nav>
+
+      <div className={styles.sidebarFooter}>
+        <button className={styles.btnProgreso} onClick={onShowProgress}>
+          {/* TEXTO DINÁMICO SEGÚN TU SOLICITUD */}
+          {aprobado ? "ESTADO: APROBADO" : `FALTA POR APROBAR`}
+        </button>
+      </div>
     </aside>
   );
 };

@@ -21,7 +21,30 @@ function App() {
     email: "estudiante@chakray.mx"
   });
 
-  // --- 1. LÓGICA DE ESTADÍSTICAS ---
+  // --- 1. FUNCIÓN AUXILIAR DE CONTEO (Para reutilizar en stats y en el guardado) ---
+  const calcularAciertosDeCurso = (curso, respuestas) => {
+    const examen = curso.secciones?.find(s => s.tipo === 'examen');
+    if (!examen) return 0;
+
+    let aciertos = 0;
+    examen.preguntas.forEach(p => {
+      const respUser = respuestas[`${curso.id}_${p.id}`];
+      const respCorrecta = p.respuestaCorrecta;
+      
+      if (p.esMultiple) {
+        if (Array.isArray(respUser) && Array.isArray(respCorrecta)) {
+          const esIgual = respUser.length === respCorrecta.length &&
+                          respUser.every(val => respCorrecta.includes(val));
+          if (esIgual) aciertos++;
+        }
+      } else {
+        if (respUser == respCorrecta) aciertos++;
+      }
+    });
+    return aciertos;
+  };
+
+  // --- 2. LÓGICA DE ESTADÍSTICAS ---
   const statsGlobales = useMemo(() => {
     let sumaPorcentajes = 0;
     let examenesRealizados = 0;
@@ -36,20 +59,7 @@ function App() {
 
       if (tieneRespuestas) {
         examenesRealizados++;
-        let aciertos = 0;
-        examen.preguntas.forEach(p => {
-          const respUser = userAnswers[`${curso.id}_${p.id}`];
-          const respCorrecta = p.respuestaCorrecta;
-          if (p.esMultiple) {
-            if (Array.isArray(respUser) && Array.isArray(respCorrecta)) {
-              const esIgual = respUser.length === respCorrecta.length &&
-                              respUser.every(val => respCorrecta.includes(val));
-              if (esIgual) aciertos++;
-            }
-          } else {
-            if (respUser == respCorrecta) aciertos++;
-          }
-        });
+        const aciertos = calcularAciertosDeCurso(curso, userAnswers);
         sumaPorcentajes += (aciertos / examen.preguntas.length) * 100;
       }
     });
@@ -60,7 +70,7 @@ function App() {
     };
   }, [userAnswers]);
 
-  // --- 2. MANEJADORES DE ESTADO ---
+  // --- 3. MANEJADORES DE ESTADO ---
   const handleLogin = (email) => {
     setUserData(prev => ({ ...prev, email }));
     setIsLogged(true);
@@ -95,8 +105,28 @@ function App() {
     setViewMode('course'); 
   };
 
+  // --- CORRECCIÓN: FINALIZAR EXAMEN CON FILTRO DE MEJOR PUNTAJE ---
   const handleFinishExamen = (respuestasNuevas) => {
-    setUserAnswers(prev => ({ ...prev, ...respuestasNuevas }));
+    setUserAnswers(prev => {
+      // Extraemos el ID del curso de las nuevas respuestas (ej: "1_q1" -> "1")
+      const primeraLlave = Object.keys(respuestasNuevas)[0];
+      if (!primeraLlave) return prev;
+      const cursoId = primeraLlave.split('_')[0];
+      
+      const cursoData = dataCursos.find(c => c.id.toString() === cursoId.toString());
+      
+      // Comparamos aciertos: Nuevo Intento vs Lo que ya teníamos guardado
+      const nuevosAciertos = calcularAciertosDeCurso(cursoData, respuestasNuevas);
+      const viejosAciertos = calcularAciertosDeCurso(cursoData, prev);
+
+      if (nuevosAciertos >= viejosAciertos) {
+        return { ...prev, ...respuestasNuevas };
+      } else {
+        // Si el puntaje es menor, ignoramos las nuevas respuestas y dejamos las viejas
+        console.log("Se conservó el puntaje anterior por ser más alto.");
+        return prev;
+      }
+    });
     setViewMode('progress'); 
   };
 
@@ -108,6 +138,7 @@ function App() {
       });
       return limpias;
     });
+    // Al resetear, lo mandamos de vuelta al curso para que pueda iniciar de nuevo
     setViewMode('course');
   };
 
@@ -115,15 +146,14 @@ function App() {
 
   return (
     <div className={styles.appContainer}>
-      {/* CORRECCIÓN: El Sidebar necesita saber cuál es el curso seleccionado 
-          para mostrar las lecciones correctas */}
       {courseSelected && viewMode === 'course' && (
         <Sidebar 
-          cursoActual={courseSelected} // <--- Asegúrate que tu Sidebar use esta prop
+          cursoActual={courseSelected} 
           cursos={dataCursos} 
           activeId={currentPage?.id} 
           onSelect={handleSelectPage} 
           onShowProgress={() => setViewMode('progress')}
+          userAnswers={userAnswers} // <--- ¡No olvides esta línea!
         />
       )}
       
@@ -131,12 +161,7 @@ function App() {
         <header className={styles.header}>
           <div className={styles.headerLeft} />
           <div className={styles.logoContainer}>
-            <img 
-              src={logoChakray} 
-              alt="Logo" 
-              className={styles.logo} 
-              onClick={handleGoHome}
-            />
+            <img src={logoChakray} alt="Logo" className={styles.logo} onClick={handleGoHome} />
           </div>
           <div className={styles.headerRight}>
             <button onClick={handleGoProfile} className={styles.btnNav}>MI PERFIL</button>
@@ -146,11 +171,7 @@ function App() {
 
         <main className={styles.contentArea}>
           {viewMode === 'profile' ? (
-            <Perfil 
-              usuario={userData} 
-              stats={statsGlobales} 
-              onBack={handleGoHome} 
-            />
+            <Perfil usuario={userData} stats={statsGlobales} onBack={handleGoHome} />
           ) : viewMode === 'progress' ? (
             <Avance 
               cursos={dataCursos} 
@@ -161,16 +182,13 @@ function App() {
           ) : courseSelected ? (
             <MainContent 
               activePage={currentPage} 
-              cursos={dataCursos} // <--- CORRECCIÓN: Faltaba pasar los cursos para que funcione la navegación interna
+              cursos={dataCursos}
               onSelect={handleSelectPage}
               onFinishExamen={handleFinishExamen}
               userAnswers={userAnswers}
             />
           ) : (
-            <Welcome 
-              cursos={dataCursos} 
-              onSelectCurso={handleSelectCurso} 
-            />
+            <Welcome cursos={dataCursos} onSelectCurso={handleSelectCurso} />
           )}
         </main>
       </div>

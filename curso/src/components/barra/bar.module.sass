@@ -1,125 +1,101 @@
-@import ../presentation/variables
-
-.bar
+$rojo-corporativo: #E11F26
+$gris-oscuro:   #49494A
+$gris-intermedio:        #878787
+$blanco: #ffffff
+$transparente-blanco: #CCCCCC
+.sidebar
   width: 280px
-  background-color: $color-gris-dark
-  min-height: 100vh
+  height: 100vh
+  background-color: $gris-oscuro
+  color: $blanco
   display: flex
   flex-direction: column
-  box-shadow: 4px 0 10px rgba(0,0,0,0.1)
-  font-family: $font-main
+  border-right: 1px solid rgba($blanco, 0.05)
+  position: sticky
+  top: 0
 
 .sidebarHeader
-  padding: 20px 0
+  padding: 30px 20px
+  border-bottom: 1px solid rgba($blanco, 0.1)
+  
+  h2
+    font-size: 1.1rem
+    text-transform: uppercase
+    letter-spacing: 1px
+    margin: 0
+    color: $blanco
+    font-weight: 800
 
-.navTitle
-  color: $color-white
-  text-align: center
-  padding: 10px 0
+.navLista
+  flex: 1
+  padding: 20px 0
+  overflow-y: auto
+  display: flex
+  flex-direction: column
+  gap: 8px
+
+  // Personalización del scrollbar para que no se vea feo
+  &::-webkit-scrollbar
+    width: 5px
+  &::-webkit-scrollbar-thumb
+    background: $gris-intermedio
+    border-radius: 10px
+
+.navItem
+  background: transparent
+  border: none
+  color: rgba($blanco, 0.7)
+  padding: 12px 25px
+  text-align: left
+  cursor: pointer
+  font-size: 0.95rem
+  transition: all 0.2s ease
+  display: flex
+  align-items: center
+  width: 100%
+  border-left: 4px solid transparent
+
+  &.locked
+    opacity: 0.4
+    cursor: not-allowed
+    filter: grayscale(1)
+    &:hover
+      background: transparent // Evita el cambio de color al pasar el mouse
+
+  &.active
+    background: $gris-intermedio
+    color: $blanco
+    border-left-color: $rojo-corporativo
+    font-weight: 600
+    box-shadow: inset 10px 0 15px -10px rgba($rojo-corporativo, 0.3)
+
+.itemLabel
+    display: flex
+    align-items: center
+    gap: 12px
+    svg
+      font-size: 0.8rem
+      color: $blanco
+
+.sidebarFooter
+  padding: 20px
+  border-top: 1px solid rgba($blanco, 0.1)
+  background: lighten($gris-oscuro, 2%)
+
+.btnProgreso
+  width: 100%
+  padding: 12px
+  background: transparent
+  border: 1px solid $gris-intermedio
+  color: $blanco
+  border-radius: 6px
+  font-weight: bold
   text-transform: uppercase
   font-size: 0.8rem
-  letter-spacing: 2px
-  opacity: 0.9
-  font-family: $font-bold
-
-.progressNav
-  padding: 0 20px
-  margin-bottom: 15px
-
-.progressBtn
-  @extend .btn-primary // Reutilizamos tu lógica de botones
-  width: 100%
-  background-color: rgba($color-white, 0.2) // 
-  color: $color-white
-  border: 1px light rgba($color-white, 0.3)
-  padding: 10px
-  font-size: $font-size-sm
-  display: flex
-  align-items: center
-  justify-content: center
-  gap: 10px
-
-  &:hover
-    background-color: $color-midnight
-    border-color: $color-midnight
-    transform: translateY(-2px)
-
-.separator
-  border: 0
-  border-top: 1px solid rgba($color-white, 0.2)
-  margin: 0 20px 20px
-
-.courseGroup
-  margin-bottom: 10px
-
-.courseBanner
-  background-color: $color-white
-  color: $color-midnight
-  padding: 12px 20px
-  font-weight: 800
-  font-size: 0.95rem
-  border: none
-  border-radius: 0 50px 50px 0
-  width: 90%
   cursor: pointer
-  text-transform: uppercase
-  display: flex
-  justify-content: space-between
-  align-items: center
-  box-shadow: 3px 3px 8px rgba(0,0,0,0.1)
   transition: all 0.3s ease
 
   &:hover
-    width: 95%
-    background-color: $color-smokey-white
-
-  .arrow
-    transition: transform 0.3s ease
-    font-size: 0.7rem
-    &.open
-      transform: rotate(180deg)
-
-.linksList
-  list-style: none
-  padding: 5px 0
-  margin: 0
-
-.navBtn
-  background: none
-  border: none
-  color: rgba($color-white, 0.8)
-  display: block
-  width: 100%
-  text-align: left
-  padding: 12px 30px
-  cursor: pointer
-  font-size: 0.9rem
-  transition: all 0.2s ease
-  position: relative
-
-  &:hover:not(.locked)
-    color: $color-white
-    background-color: rgba($color-midnight, 0.2)
-    padding-left: 35px
-
-  &.active
-    color: $color-white
-    background-color: $color-midnight
-    font-weight: bold
-    
-    &::before
-      content: ''
-      position: absolute
-      left: 0
-      top: 0
-      bottom: 0
-      width: 6px
-      background-color: $color-white
-
-.locked
-  opacity: 0.5
-  cursor: not-allowed
-  
-.icon
-  margin-left: 8px
-  font-size: 0.9rem
+    background: $rojo-corporativo
+    color: $blanco
+    box-shadow: 0 4px 15px rgba($rojo-corporativo, 0.3)
