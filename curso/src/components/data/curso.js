@@ -49,7 +49,7 @@ function ProgressPage({ userAnswers, cursos }) {
     return {
       aciertos,
       total: totalPreguntas,
-      aprobado: porcentaje >= 70, // Por ejemplo, pasa con 70%
+      aprobado: porcentaje >= 70, 
       porcentaje
     };
   };
@@ -80,17 +80,17 @@ function ProgressPage({ userAnswers, cursos }) {
 }
 
 survey.onComplete.add((sender) => {
-  const respuestas = sender.data; // Esto devuelve algo como { "q1": 1, "q2": 2 }
+  const respuestas = sender.data;
   onFinishExamen(respuestas); 
 });
 
 survey.applyTheme({
   cssVariables: {
     "--sjs-general-backcolor": "transparent",
-    "--sjs-general-forecolor": "#111111", // Tu $color-midnight
-    "--sjs-primary-backcolor": "#E11F26", // Tu rojo
+    "--sjs-general-forecolor": "#111111", 
+    "--sjs-primary-backcolor": "#E11F26", 
     "--sjs-primary-backcolor-light": "rgba(225, 31, 38, 0.1)",
-    "--sjs-primary-backcolor-hover": "#49494A", // Gris dark en hover
+    "--sjs-primary-backcolor-hover": "#49494A", 
     "--sjs-article-font-main-color": "#111111",
     "--sjs-question-title-color": "#111111",
     "--sjs-font-family": "Roboto, sans-serif"
