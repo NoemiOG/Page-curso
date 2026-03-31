@@ -17,11 +17,12 @@ function App() {
   const [userAnswers, setUserAnswers] = useState({}); 
 
   const [userData, setUserData] = useState({
-    nombre: "Michi",
+    nombre: "Ingeniño 1",
     email: "estudiante@chakray.mx"
   });
 
-  // --- 1. FUNCIÓN AUXILIAR DE CONTEO (Para reutilizar en stats y en el guardado) ---
+  // --- 1. FUNCIÓN AUXILIAR DE CONTEO ---
+  // Calcula la cantidad de aciertos para un curso específico comparando las respuestas proporcionadas contra el JSON de datos.
   const calcularAciertosDeCurso = (curso, respuestas) => {
     const examen = curso.secciones?.find(s => s.tipo === 'examen');
     if (!examen) return 0;
@@ -45,6 +46,7 @@ function App() {
   };
 
   // --- 2. LÓGICA DE ESTADÍSTICAS ---
+  // Memoriza el cálculo de estadísticas globales para evitar re-renderizados innecesarios, procesando el promedio general de los exámenes realizados.
   const statsGlobales = useMemo(() => {
     let sumaPorcentajes = 0;
     let examenesRealizados = 0;
@@ -71,11 +73,14 @@ function App() {
   }, [userAnswers]);
 
   // --- 3. MANEJADORES DE ESTADO ---
+  
+  // Establece el estado de autenticación y actualiza la información del usuario tras un inicio de sesión exitoso.
   const handleLogin = (email) => {
     setUserData(prev => ({ ...prev, email }));
     setIsLogged(true);
   };
 
+  // Restablece todos los estados globales a sus valores iniciales para finalizar la sesión del usuario.
   const handleLogout = () => {
     setIsLogged(false);
     setCourseSelected(null);
@@ -84,14 +89,17 @@ function App() {
     setViewMode('course');
   };
 
+  // Cambia la vista activa hacia el perfil del usuario.
   const handleGoProfile = () => setViewMode('profile');
   
+  // Restablece la navegación hacia la pantalla de bienvenida o menú principal.
   const handleGoHome = () => {
     setCourseSelected(null);
     setCurrentPage(null);
     setViewMode('course');
   };
 
+  // Define el curso seleccionado y establece la primera sección del mismo como página activa.
   const handleSelectCurso = (curso) => {
     setCourseSelected(curso);
     if (curso.secciones?.length > 0) {
@@ -100,36 +108,37 @@ function App() {
     setViewMode('course');
   };
 
+  // Actualiza la sección o tema específico que el usuario desea visualizar.
   const handleSelectPage = (page) => {
     setCurrentPage(page);
     setViewMode('course'); 
   };
 
-  // --- CORRECCIÓN: FINALIZAR EXAMEN CON FILTRO DE MEJOR PUNTAJE ---
+  // --- 4. GESTIÓN DE EXÁMENES ---
+
+  // Procesa la finalización de un examen, comparando el nuevo resultado con el anterior para conservar únicamente la calificación más alta.
   const handleFinishExamen = (respuestasNuevas) => {
     setUserAnswers(prev => {
-      // Extraemos el ID del curso de las nuevas respuestas (ej: "1_q1" -> "1")
       const primeraLlave = Object.keys(respuestasNuevas)[0];
       if (!primeraLlave) return prev;
       const cursoId = primeraLlave.split('_')[0];
       
       const cursoData = dataCursos.find(c => c.id.toString() === cursoId.toString());
       
-      // Comparamos aciertos: Nuevo Intento vs Lo que ya teníamos guardado
       const nuevosAciertos = calcularAciertosDeCurso(cursoData, respuestasNuevas);
       const viejosAciertos = calcularAciertosDeCurso(cursoData, prev);
 
       if (nuevosAciertos >= viejosAciertos) {
         return { ...prev, ...respuestasNuevas };
       } else {
-        // Si el puntaje es menor, ignoramos las nuevas respuestas y dejamos las viejas
-        console.log("Se conservó el puntaje anterior por ser más alto.");
+        console.log("Se conserva el puntaje anterior por ser más alto.");
         return prev;
       }
     });
     setViewMode('progress'); 
   };
 
+  // Elimina las respuestas almacenadas de un curso específico y redirige al usuario a la vista de contenido.
   const handleResetExamen = (cursoId) => {
     setUserAnswers(prev => {
       const limpias = { ...prev };
@@ -138,14 +147,15 @@ function App() {
       });
       return limpias;
     });
-    // Al resetear, lo mandamos de vuelta al curso para que pueda iniciar de nuevo
     setViewMode('course');
   };
 
+  // Renderiza el componente de inicio de sesión si el usuario no está autenticado.
   if (!isLogged) return <Login onLogin={handleLogin} />;
 
   return (
     <div className={styles.appContainer}>
+      {/* Muestra la barra lateral solo durante la navegación de cursos */}
       {courseSelected && viewMode === 'course' && (
         <Sidebar 
           cursoActual={courseSelected} 
@@ -153,7 +163,7 @@ function App() {
           activeId={currentPage?.id} 
           onSelect={handleSelectPage} 
           onShowProgress={() => setViewMode('progress')}
-          userAnswers={userAnswers} // <--- ¡No olvides esta línea!
+          userAnswers={userAnswers} 
         />
       )}
       
@@ -170,8 +180,15 @@ function App() {
         </header>
 
         <main className={styles.contentArea}>
+          {/* Renderizado condicional de vistas según el modo activo */}
           {viewMode === 'profile' ? (
-            <Perfil usuario={userData} stats={statsGlobales} onBack={handleGoHome} />
+            <Perfil 
+                usuario={userData} 
+                stats={statsGlobales} 
+                onBack={handleGoHome} 
+                cursos={dataCursos}      // <--- Pasamos la lista de cursos
+                userAnswers={userAnswers} // <--- Pasamos las respuestas para el cálculo
+            />
           ) : viewMode === 'progress' ? (
             <Avance 
               cursos={dataCursos} 

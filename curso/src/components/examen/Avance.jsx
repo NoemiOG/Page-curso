@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import styles from './Avance.module.sass';
 
-const Avance = ({ cursos = [], userAnswers = {}, onContinuar, onResetExamen }) => {
+// Recibe adicionalmente 'cursoActualId' para filtrar la visualización inmediata.
+const Avance = ({ cursos = [], userAnswers = {}, onContinuar, onResetExamen, cursoActualId }) => {
   const [cursoAbierto, setCursoAbierto] = useState(null);
 
+  // Gestiona la apertura y cierre del acordeón de detalles para cada curso.
   const toggleDetalles = (cursoId) => {
     setCursoAbierto(cursoAbierto === cursoId ? null : cursoId);
   };
 
+  // Procesa las respuestas del usuario y calcula el porcentaje de éxito comparando contra las respuestas correctas.
   const calcularResultado = (curso) => {
     const examen = curso.secciones?.find(s => s.tipo === 'examen');
     if (!examen) return null;
@@ -32,6 +35,7 @@ const Avance = ({ cursos = [], userAnswers = {}, onContinuar, onResetExamen }) =
       
       if (esCorrecta) aciertos++;
 
+      // Transforma el índice o valor de la respuesta en el texto legible de la opción.
       const obtenerTexto = (val) => {
         if (val === undefined || val === null) return "Sin responder";
         if (Array.isArray(val)) {
@@ -58,15 +62,23 @@ const Avance = ({ cursos = [], userAnswers = {}, onContinuar, onResetExamen }) =
     };
   };
 
+  // Filtra la lista de cursos para mostrar únicamente el que se está cursando actualmente.
+  // Si no se proporciona cursoActualId, por seguridad muestra todos los intentados.
+  const cursosAVisualizar = cursoActualId 
+    ? cursos.filter(c => c.id === cursoActualId)
+    : cursos;
+
   return (
     <div className={styles.progresoContainer}>
       <header className={styles.headerTop}>
-        <h1 className={styles.mainTitle}>Estado de tus Evaluaciones</h1>
-        <p className={styles.subtitle}>Supera el 80% para completar el curso.</p>
+        <h1 className={styles.mainTitle}>Resultado de la Evaluación</h1>
+        <p className={styles.subtitle}>
+          {cursoActualId ? "Revisa tu desempeño en este módulo." : "Resumen de tus cursos realizados."}
+        </p>
       </header>
 
       <div className={styles.cursosGrid}>
-        {cursos.map(curso => {
+        {cursosAVisualizar.map(curso => {
           const res = calcularResultado(curso);
           if (!res || !res.intentado) return null;
 
@@ -91,7 +103,7 @@ const Avance = ({ cursos = [], userAnswers = {}, onContinuar, onResetExamen }) =
                   {isOpen ? "Cerrar detalles ▲" : "Revisar mis respuestas ▼"}
                 </button>
 
-                {/* BOTÓN CONDICIONAL: Solo aparece si NO ha aprobado */}
+                {/* Renderizado condicional del botón de reinicio basado en el estado de aprobación. */}
                 {!res.aprobado && (
                   <button className={styles.btnReset} onClick={() => onResetExamen(curso.id)}>
                     Intentar de nuevo ↻

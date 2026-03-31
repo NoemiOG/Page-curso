@@ -2,24 +2,27 @@
 
 .container
   flex: 1
-  padding: 2rem
+  padding: 2rem // Mantiene un margen para que la tarjeta no pegue a los bordes
   background-color: $color-gris-light
   display: flex
   flex-direction: column
-  min-height: 100vh // Asegura que cubra el alto
+  min-height: calc(100vh - 80px) // Ajusta el alto restando el header aproximado
   font-family: $font-main
 
 .screenWrapper
-  background-color: #000 // Fondo negro puro para el slider
-  border-radius: 20px    // Corregido: antes tenías una variable de color aquí
+  background-color: #000 
+  border-radius: 15px // Bordes redondeados para un look más moderno y suave
   position: relative
-  aspect-ratio: 16 / 9
+  // Define un alto máximo para que no ocupe toda la pantalla y se mantenga contenido
+  width: 100%
+  height: 65vh 
+  max-height: 500px // Límite de crecimiento para evitar que se desborde en monitores grandes
   display: flex
   justify-content: center
   align-items: center
   overflow: hidden
-  border: 2px solid $color-gris
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4)
+  border: 1px solid rgba($color-midnight, 0.1)
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2)
 
 .viewerFrame
   width: 100%
@@ -40,61 +43,60 @@
   align-items: center
   justify-content: center
   color: $color-white
-  padding: 3rem
+  padding: 2rem
   text-align: center
   
   h2
-    font-size: 2.5rem
+    font-size: 2.8rem // Tamaño ligeramente reducido para que quepa bien en el nuevo espacio
     font-family: $font-bold
-    text-shadow: 2px 2px 10px rgba(0,0,0,0.5)
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.4)
 
 .actionRow
   display: flex
   justify-content: center
-  margin-top: -25px 
+  margin-top: -25px // Superpone el botón ligeramente sobre el marco inferior
   z-index: 20
   position: relative
 
 .btnAccionFinal
   @extend .btn-primary 
-  min-width: 250px
-  padding: 15px 30px
-  font-size: $font-size-md
-  box-shadow: 0 10px 20px rgba($color-rojo-bright, 0.3)
+  min-width: 220px
+  padding: 12px 25px
+  font-size: 0.9rem
+  box-shadow: 0 8px 20px rgba($color-rojo-bright, 0.3)
 
 .textContent
-  margin-top: 50px
-  color: $color-smokey-white // Cambiado para que sea legible sobre midnight
-  padding: 0 20px
+  margin-top: 40px
+  padding-bottom: 50px
   
   .textHeader
-    border-bottom: 1px solid rgba($color-white, 0.1)
+    border-bottom: 1px solid rgba($color-midnight, 0.1)
     margin-bottom: 20px
     padding-bottom: 10px
 
     .badge
       background-color: $color-rojo-bright
       color: $color-white
-      padding: 15px 30px
-      border-radius: 20px
-      font-size: 1.7rem
+      padding: 5px 15px
+      border-radius: 4px
+      font-size: 0.8rem
       font-weight: bold
       text-transform: uppercase
-      margin-bottom: 10px
+      margin-bottom: 8px
       display: inline-block
 
     h2
       color: $color-midnight
       text-transform: uppercase
-      font-size: 1.4rem
-      font-weight: 700
+      font-size: 1.5rem
+      font-weight: 800
       margin: 0
 
   .bodyText
     p
-      line-height: 1.8
-      font-size: 1.1rem
-      color: $color-gris-dark// Texto suave para lectura larga
+      line-height: 1.7
+      font-size: 1rem
+      color: $color-gris-dark
       text-align: justify
 
 .controlesFijos
@@ -104,16 +106,16 @@
   transform: translateY(-50%)
   display: flex
   justify-content: space-between
-  padding: 0 20px
+  padding: 0 15px
   pointer-events: none
   
   button
     pointer-events: auto
-    background: rgba($color-midnight, 0.6)
+    background: rgba($color-midnight, 0.5)
     color: $color-white
-    border: 1px solid rgba($color-white, 0.2)
-    width: 50px
-    height: 50px
+    border: none
+    width: 45px
+    height: 45px
     cursor: pointer
     border-radius: 50%
     transition: all 0.3s ease
@@ -125,28 +127,3 @@
     &:hover
       background: $color-rojo-bright
       transform: scale(1.1)
-      border-color: transparent
-
-.paginationArea
-  position: absolute
-  bottom: 20px
-  width: 100%
-  display: flex
-  justify-content: center
-
-.paginationDots
-  display: flex
-  gap: 8px
-  
-  .dot
-    width: 10px
-    height: 10px
-    border-radius: 50%
-    background: rgba($color-white, 0.3)
-    cursor: pointer
-    transition: all 0.3s
-    
-    &.active
-      background: $color-rojo-bright
-      width: 25px // Efecto de pastilla para el activo
-      border-radius: 5px
