@@ -1,130 +1,118 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import ExamenViewer from '../examen/ExamenPrueba'; 
 import Avance from '../examen/Avance'; 
 import styles from './MainContent.module.sass';
-import { FaArrowCircleLeft, FaArrowCircleRight } from "react-icons/fa";
 
-const MainContent = ({ activePage, cursos = [], onSelect, onFinishExamen, userAnswers }) => {
-  const [mostrarProgreso, setMostrarProgreso] = useState(false);
-  const [pos, setPos] = useState(0);
+const MainContent = ({ 
+  activePage, 
+  cursos = [], 
+  onSelect, 
+  onSaveAnswers, // Viene de App.jsx (guarda resultados y cambia a viewMode: 'progress')
+  userAnswers,   
+  onResetExamen, 
+  viewMode,      
+  setViewMode,    
+  onGoHome       // Nueva prop para resetear a la Bienvenida
+}) => {
 
-  // Identifica el curso actual basándose en la sección activa para determinar la secuencia de navegación.
   const cursoActual = cursos.find(c => 
-    c.secciones.some(s => s.id === activePage?.id)
+    c.secciones?.some(s => s.id === activePage?.id)
   );
+  const secciones = cursoActual?.secciones || [];
+  const indexActual = secciones.findIndex(s => s.id === activePage?.id);
+  
+  const siguienteSeccion = secciones[indexActual + 1];
+  const anteriorSeccion = secciones[indexActual - 1];
 
-  // Reinicia la posición del slider y el estado de progreso cada vez que cambia el tema o lección.
+  // Reset del scroll al cambiar de tema
   useEffect(() => {
-    setPos(0);
-    setMostrarProgreso(false);
+    const container = document.getElementById('mainScrollContainer');
+    if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activePage?.id]);
 
-  // Retorna un estado vacío si no se ha seleccionado ninguna página.
-  if (!activePage) return <div className={styles.container}>Selecciona un tema</div>;
+  if (!activePage) return <div className={styles.emptyState}>Selecciona un tema para comenzar</div>;
 
-  // --- VISTA DE RESULTADOS ---
-  // Renderiza el componente de Avance cuando el usuario finaliza una evaluación.
-  if (mostrarProgreso) {
+  // --- 1. VISTA DE RESULTADOS (AVANCE) ---
+  if (viewMode === 'progress') {
     return (
       <div className={styles.fullView}>
         <Avance 
-          cursos={cursos}
-          userAnswers={userAnswers}
-          onContinuar={() => setMostrarProgreso(false)} 
+          cursos={cursos} 
+          userAnswers={userAnswers} 
+          // Al dar clic en "Volver a mis cursos", ejecutamos la limpieza hacia la Bienvenida
+          onContinuar={onGoHome} 
+          onResetExamen={onResetExamen}
+          cursoIdFiltrado={cursoActual?.id} 
         />
       </div>
     );
   }
 
-  // --- VISTA DE EXAMEN ---
-  // Carga el visor de exámenes si el tipo de sección actual es 'examen', enviando los resultados al estado global al finalizar.
+  // --- 2. VISTA DE EXAMEN ---
   if (activePage.tipo === 'examen') {
     return (
       <div className={styles.fullView}>
         <ExamenViewer 
           data={activePage} 
           cursoId={cursoActual?.id} 
-          onFinish={(respuestas) => {
-            onFinishExamen(respuestas);
-            setMostrarProgreso(true);
+          onFinish={(respuestas) => { 
+            // Esto guarda los datos y cambia el viewMode a 'progress' en App.jsx
+            onSaveAnswers(respuestas); 
           }} 
         />
       </div>
     );
   }
 
-  // --- LÓGICA DE NAVEGACIÓN ---
-  const slides = activePage?.slides || [];
-  const tieneSlides = slides.length > 0;
-  const esUltimaSlide = !tieneSlides || pos === slides.length - 1;
-
-  // Gestiona el avance y retroceso circular entre las diapositivas del tema actual.
-  const slideRight = () => setPos((prev) => (prev + 1) % slides.length);
-  const slideLeft = () => setPos((prev) => (prev - 1 + slides.length) % slides.length);
-
-  // Determina la siguiente sección disponible en el curso y actualiza la selección global.
-  const handleSiguienteLeccion = () => {
-    if (!cursoActual) return;
-    const secciones = cursoActual.secciones;
-    const indexActual = secciones.findIndex(s => s.id === activePage.id);
-    const siguienteSeccion = secciones[indexActual + 1];
-    if (siguienteSeccion) onSelect(siguienteSeccion);
-  };
+  // --- 3. VISTA DE CONTENIDO (PDF/TEMAS) ---
+  const esExamenSiguiente = siguienteSeccion?.tipo === 'examen';
 
   return (
-    <main className={styles.container}>
-      {/* SECCIÓN VISUAL: Contenedor principal para el slider de contenidos o el placeholder de tema */}
-      <section className={styles.screenWrapper}>
-        <div className={styles.viewerFrame}>
-          {tieneSlides ? (
-            <div
-              className={styles.slider}
-              style={{ transform: `translateX(-${pos * 100}%)` }}
-            >
-              {slides.map((slide, index) => (
-                <div key={index} className={styles.slide} style={{ background: slide.color || '#2c2c2c' }}>
-                  <h2>{slide.content}</h2>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.slidePlaceholder}>
-              <h2>{activePage.tituloTema}</h2>
-              <p>Visualización de contenido</p>
-            </div>
-          )}
-        </div>
-
-        {/* CONTROLES FIJOS: Renderizado condicional de botones de navegación interna */}
-        {slides.length > 1 && (
-          <div className={styles.controlesFijos}>
-            <button className={styles.prevFixed} onClick={slideLeft}><FaArrowCircleLeft /></button>
-            <button className={styles.nextFixed} onClick={slideRight}><FaArrowCircleRight /></button>
-          </div>
-        )}
-      </section>
-
-      {/* FILA DE ACCIÓN: Muestra el botón de transición de lección únicamente al llegar al final del contenido */}
-      <div className={styles.actionRow}>
-        {esUltimaSlide && (
-          <button className={styles.btnAccionFinal} onClick={handleSiguienteLeccion}>
-            {cursoActual?.secciones[cursoActual.secciones.findIndex(s => s.id === activePage.id) + 1]?.tipo === 'examen' 
-             ? "IR AL EXAMEN ➔" 
-             : "SIGUIENTE LECCIÓN ➔"}
-          </button>
-        )}
-      </div>
-
-      {/* CONTENIDO TEXTUAL: Despliega la información detallada y descripción de la lección activa */}
-      <article className={styles.textContent}>
-        <header className={styles.textHeader}>
-          <span className={styles.badge}>{activePage.label || 'LECCIÓN'}</span>
-          <h2>{activePage.tituloTema}</h2>
+    <main id="mainScrollContainer" className={styles.mainContainer}>
+      <div className={styles.contentWrapper}>
+        
+        <header className={styles.mainHeader}>
+          <span className={styles.categoryTag}>{cursoActual?.titulo}</span>
+          <h1 className={styles.topTitle}>{activePage.tituloTema}</h1>
         </header>
-        <div className={styles.bodyText}>
-          <p>{activePage.textoLargo}</p>
-        </div>
-      </article>
+
+        <section className={styles.viewerBlock}>
+          <div className={styles.viewerFrame}>
+            <iframe 
+              src={`${activePage.url}#toolbar=0&navpanes=0`} 
+              className={styles.pdfElement} 
+              title="Visor de Contenido"
+            />
+          </div>
+          
+          <div className={styles.navigationRow}>
+            <button 
+              className={styles.btnRegresar}
+              onClick={() => onSelect(anteriorSeccion)}
+              disabled={!anteriorSeccion}
+            >
+              REGRESAR
+            </button>
+
+            <button 
+              className={esExamenSiguiente ? styles.btnExamen : styles.btnSiguiente} 
+              onClick={() => onSelect(siguienteSeccion)}
+              disabled={!siguienteSeccion}
+            >
+              {esExamenSiguiente ? "REALIZAR EXAMEN" : "SIGUIENTE TEMA"}
+            </button>
+          </div>
+        </section>
+
+        <article className={styles.infoSection}>
+          <div className={styles.divider} />
+          <h2 className={styles.subTitle}>Resumen del Tema</h2>
+          <div className={styles.description}>
+            <p>{activePage.textoLargo}</p>
+          </div>
+        </article>
+
+      </div>
     </main>
   );
 };

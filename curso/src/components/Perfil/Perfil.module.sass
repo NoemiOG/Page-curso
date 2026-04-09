@@ -1,11 +1,10 @@
-@import ../presentation/variables
-
 .perfilContainer
   padding: 3rem 2rem
   max-width: 800px
   margin: 0 auto
   animation: fadeIn 0.5s ease
   font-family: $font-main
+  color: var(--text-main)
 
 .perfilHeader
   display: flex
@@ -13,12 +12,13 @@
   gap: 2rem
   margin-bottom: 4rem
   padding-bottom: 2.5rem
-  border-bottom: 1px solid $color-smokey-white
+  border-bottom: 1px solid var(--border-color)
 
   .avatar
     width: 100px
     height: 100px
-    background-color: $color-rojo-bright
+    // Usamos $color-red de tus variables
+    background-color: $color-red
     color: $color-white
     border-radius: 50%
     display: flex
@@ -27,7 +27,7 @@
     font-size: 3rem
     font-family: $font-bold
     text-transform: uppercase
-    box-shadow: 0 10px 20px rgba($color-rojo-bright, 0.3)
+    box-shadow: 0 10px 20px rgba($color-red, 0.3)
     overflow: hidden
 
     img
@@ -39,10 +39,11 @@
     h2
       font-size: 2rem
       margin: 0
-      color: $color-midnight
+      color: var(--text-main)
       font-family: $font-bold
     p
-      color: $color-gris
+      color: var(--text-main)
+      opacity: 0.6
       font-size: 1.1rem
       margin: 5px 0 0
 
@@ -53,11 +54,11 @@
   margin-bottom: 4rem
 
 .statCard
-  background: $color-white
+  background-color: var(--bg-card)
   padding: 2rem
   border-radius: 15px
   text-align: center
-  border-top: 5px solid $color-rojo-bright 
+  border-top: 5px solid $color-red 
   box-shadow: 0 10px 25px rgba(0,0,0,0.05)
   transition: transform 0.3s ease
 
@@ -66,7 +67,8 @@
   
   .statLabel
     font-size: 0.85rem
-    color: $color-gris
+    color: var(--text-main)
+    opacity: 0.7
     text-transform: uppercase
     letter-spacing: 1.5px
     font-weight: 700
@@ -75,17 +77,65 @@
     font-size: 3rem
     font-weight: 900
     margin: 10px 0 0
-    color: $color-gris-dark
+    color: var(--text-main)
     font-family: $font-bold
 
+.cursosListSection
+  margin-top: 30px
+  background-color: var(--bg-card)
+  padding: 30px
+  border-radius: 15px
+  border: 1px solid var(--border-color)
+
+.sectionTitle
+  font-size: 1.1rem
+  color: $color-red
+  text-transform: uppercase
+  margin-bottom: 20px
+  font-weight: 700
+  letter-spacing: 1px
+
+.listaCursosPerfil
+  display: flex
+  flex-direction: column
+  gap: 12px
+
+.cursoFila
+  display: flex
+  justify-content: space-between
+  align-items: center
+  padding: 15px 20px
+  background-color: var(--bg-app)
+  border-radius: 10px
+  border-left: 4px solid transparent
+  transition: border-color 0.2s ease
+
+  &:hover
+    border-left-color: $color-red
+
+.nombreCurso
+  font-weight: 500
+  color: var(--text-main)
+
+.badgeCompletado
+  color: #2ecc71 // Éxito (Sugerido mantener)
+  font-weight: 800
+  font-size: 0.9rem
+
+.badgePendiente
+  color: $color-red
+  font-weight: 800
+  font-size: 0.9rem
+  opacity: 0.8
+
 .footer
+  margin-top: 3rem
   display: flex
   justify-content: center
 
 .btnVolver
   @extend .btn-primary
   padding: 15px 40px
-  font-size: $font-size-md
 
 @keyframes fadeIn
   from
@@ -93,46 +143,4 @@
     transform: translateY(15px)
   to
     opacity: 1
-    
-.cursosListSection
-  margin-top: 30px
-  background: rgba($color-white, 0.05)
-  padding: 20px
-  border-radius: 12px
-
-.sectionTitle
-  font-size: 1rem
-  color: $color-rojo-bright
-  text-transform: uppercase
-  margin-bottom: 15px
-  font-weight: 700
-
-.listaCursosPerfil
-  display: flex
-  flex-direction: column
-  gap: 10px
-
-.cursoFila
-  display: flex
-  justify-content: space-between
-  align-items: center
-  padding: 12px 15px
-  background: $color-gris-light
-  border-radius: 8px
-  border-left: 3px solid transparent
-
-.nombreCurso
-  font-weight: 500
-  color: $color-midnight
-
-.badgeCompletado
-  color: $color-midnight
-  font-weight: bold
-  font-size: 0.9rem
-
-.badgePendiente
-  color: $color-rojo-bright
-  font-size: 0.9rem
-  opacity: 0.7
-
-  
+    transform: translateY(0)

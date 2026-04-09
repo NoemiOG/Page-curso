@@ -1,101 +1,45 @@
-$rojo-corporativo: #E11F26
-$gris-oscuro:   #49494A
-$gris-intermedio:        #878787
-$blanco: #ffffff
-$transparente-blanco: #CCCCCC
-.sidebar
-  width: 280px
-  height: 100vh
-  background-color: $gris-oscuro
-  color: $blanco
-  display: flex
-  flex-direction: column
-  border-right: 1px solid rgba($blanco, 0.05)
-  position: sticky
-  top: 0
-
-.sidebarHeader
-  padding: 30px 20px
-  border-bottom: 1px solid rgba($blanco, 0.1)
-  
-  h2
-    font-size: 1.1rem
-    text-transform: uppercase
-    letter-spacing: 1px
-    margin: 0
-    color: $blanco
-    font-weight: 800
-
-.navLista
-  flex: 1
-  padding: 20px 0
-  overflow-y: auto
-  display: flex
-  flex-direction: column
-  gap: 8px
-
-  // Personalización del scrollbar para que no se vea feo
-  &::-webkit-scrollbar
-    width: 5px
-  &::-webkit-scrollbar-thumb
-    background: $gris-intermedio
-    border-radius: 10px
-
-.navItem
-  background: transparent
-  border: none
-  color: rgba($blanco, 0.7)
-  padding: 12px 25px
-  text-align: left
-  cursor: pointer
-  font-size: 0.95rem
-  transition: all 0.2s ease
-  display: flex
-  align-items: center
-  width: 100%
-  border-left: 4px solid transparent
-
-  &.locked
-    opacity: 0.4
-    cursor: not-allowed
-    filter: grayscale(1)
-    &:hover
-      background: transparent // Evita el cambio de color al pasar el mouse
-
-  &.active
-    background: $gris-intermedio
-    color: $blanco
-    border-left-color: $rojo-corporativo
-    font-weight: 600
-    box-shadow: inset 10px 0 15px -10px rgba($rojo-corporativo, 0.3)
-
-.itemLabel
-    display: flex
-    align-items: center
-    gap: 12px
-    svg
-      font-size: 0.8rem
-      color: $blanco
-
-.sidebarFooter
-  padding: 20px
-  border-top: 1px solid rgba($blanco, 0.1)
-  background: lighten($gris-oscuro, 2%)
+// sidebar.module.sass
 
 .btnProgreso
   width: 100%
+  font-size: 0.85rem
   padding: 12px
-  background: transparent
-  border: 1px solid $gris-intermedio
-  color: $blanco
-  border-radius: 6px
-  font-weight: bold
-  text-transform: uppercase
-  font-size: 0.8rem
+  margin-top: 10px
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: 8px
+  border: none
   cursor: pointer
+  border-radius: 8px
+  background-color: var(--primary-main) // Rojo Chakray
+  color: white
   transition: all 0.3s ease
 
-  &:hover
-    background: $rojo-corporativo
-    color: $blanco
-    box-shadow: 0 4px 15px rgba($rojo-corporativo, 0.3)
+  // Cuando ya aprobaron, usamos el verde que acordamos
+  &:global(.aprobado)
+    background-color: #2ecc71
+    box-shadow: 0 4px 0 #27ae60
+    &:hover
+      background-color: #27ae60
+
+// Estilos globales para el Drawer de MUI
+&:global(.aprobado)
+    background-color: #2ecc71
+    &:hover
+      background-color: #27ae60
+
+// Solo personaliza el scroll, no el ancho ni los márgenes
+:global(.MuiDrawer-paper)
+  &::-webkit-scrollbar
+    width: 6px
+  &::-webkit-scrollbar-thumb
+    background: #49494A // Steel Grey
+    border-radius: 10px
+
+.navText
+  font-family: $font-main
+  font-weight: 500
+  // En modo oscuro usamos blanco, en modo light el midnight
+  color: var(--text-main) 
+  white-space: nowrap // Importante para que el texto no salte de línea al contraerse

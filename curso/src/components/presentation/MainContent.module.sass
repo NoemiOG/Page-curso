@@ -1,128 +1,120 @@
-@import '../presentation/variables'
+// MainContent.module.sass
 
-.container
+.mainContainer
   flex: 1
-  padding: 2rem 
-  background-color: $color-gris-light
-  display: flex
-  flex-direction: column
-  min-height: calc(100vh - 80px) 
-  font-family: $font-main
+  overflow-y: auto
+  height: 100%
+  background-color: var(--bg-app)
+  scroll-behavior: smooth
 
-.screenWrapper
-  background-color: #000 
-  border-radius: 15px 
-  position: relative
-  width: 100%
-  height: 65vh 
-  max-height: 500px 
-  display: flex
-  justify-content: center
-  align-items: center
-  overflow: hidden
-  border: 1px solid rgba($color-midnight, 0.1)
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2)
+  &::-webkit-scrollbar
+    width: 8px
+  &::-webkit-scrollbar-thumb
+    background: $color-steel
+    border-radius: 10px
+
+.contentWrapper
+  // Aumentamos el ancho máximo para Web
+  max-width: 1400px // <--- Agrandamos el contenedor de 1000px a 1400px
+  margin: 0 auto
+  padding: 40px 20px 80px
+
+.mainHeader
+  margin-bottom: 30px
+  animation: fadeIn 0.5s ease
+  
+  .categoryTag
+    color: $color-red
+    font-weight: 900
+    text-transform: uppercase
+    font-size: 0.8rem
+    letter-spacing: 2px
+
+  .topTitle
+    font-size: 2.5rem
+    color: var(--text-main)
+    font-family: $font-bold
+    margin-top: 10px
+
+.viewerBlock
+  background-color: var(--bg-card)
+  border-radius: 15px
+  padding: 20px
+  border: 1px solid var(--border-color)
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1)
+  margin-bottom: 40px
 
 .viewerFrame
   width: 100%
-  height: 100%
+  // CLAVE PARA EL TAMAÑO: Altura dinámica (ViewPort Height)
+  height: 85vh // <--- Ocupará el 85% del alto de la pantalla total
+  background-color: $color-midnight
+  border-radius: 8px
   overflow: hidden
+  margin-bottom: 20px
+  border: 1px solid var(--border-color)
 
-.slider
-  display: flex
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)
+.pdfElement
   width: 100%
   height: 100%
+  border: none
 
-.slide
-  min-width: 100%
-  height: 100%
-  display: flex
-  flex-direction: column
-  align-items: center
-  justify-content: center
-  color: $color-white
-  padding: 2rem
-  text-align: center
-  
-  h2
-    font-size: 2.8rem 
-    font-family: $font-bold
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.4)
-
-.actionRow
-  display: flex
-  justify-content: center
-  margin-top: -25px 
-  z-index: 20
-  position: relative
-
-.btnAccionFinal
-  @extend .btn-primary 
-  min-width: 220px
-  padding: 12px 25px
-  font-size: 0.9rem
-  box-shadow: 0 8px 20px rgba($color-rojo-bright, 0.3)
-
-.textContent
-  margin-top: 40px
-  padding-bottom: 50px
-  
-  .textHeader
-    border-bottom: 1px solid rgba($color-midnight, 0.1)
-    margin-bottom: 20px
-    padding-bottom: 10px
-
-    .badge
-      background-color: $color-rojo-bright
-      color: $color-white
-      padding: 5px 15px
-      border-radius: 4px
-      font-size: 0.8rem
-      font-weight: bold
-      text-transform: uppercase
-      margin-bottom: 8px
-      display: inline-block
-
-    h2
-      color: $color-midnight
-      text-transform: uppercase
-      font-size: 1.5rem
-      font-weight: 800
-      margin: 0
-
-  .bodyText
-    p
-      line-height: 1.7
-      font-size: 1rem
-      color: $color-gris-dark
-      text-align: justify
-
-.controlesFijos
-  position: absolute
-  width: 100%
-  top: 50%
-  transform: translateY(-50%)
+.navigationRow
   display: flex
   justify-content: space-between
-  padding: 0 15px
-  pointer-events: none
-  
-  button
-    pointer-events: auto
-    background: rgba($color-midnight, 0.5)
-    color: $color-white
-    border: none
-    width: 45px
-    height: 45px
-    cursor: pointer
-    border-radius: 50%
-    transition: all 0.3s ease
-    display: flex
-    align-items: center
-    justify-content: center
-    font-size: 1.2rem
+  gap: 20px
 
-    &:hover
-      background: $color-rojo-bright
-      transform: scale(1.1)
+.btnRegresar
+  @extend .btn-secondary
+  flex: 1
+  max-width: 200px
+
+.btnSiguiente
+  @extend .btn-primary
+  flex: 2
+  max-width: 300px
+
+.btnExamen
+  @extend .btn-primary
+  flex: 2
+  max-width: 300px
+  // Podrías añadir un brillo extra para el examen
+  box-shadow: 0 0 15px rgba($color-red, 0.3)
+
+.infoSection
+  padding-top: 20px
+  animation: fadeIn 0.8s ease
+
+  .divider
+    width: 60px
+    height: 4px
+    background-color: $color-red
+    margin-bottom: 25px
+
+  .subTitle
+    color: var(--text-main)
+    font-size: 1.5rem
+    font-family: $font-bold
+    margin-bottom: 15px
+
+  .description
+    color: var(--text-main)
+    opacity: 0.8
+    line-height: 1.8
+    font-size: 1.1rem
+
+.fullView
+  width: 100%
+  height: 100%
+  overflow-y: auto
+  animation: fadeIn 0.4s ease
+
+// Al final de tu archivo MainContent.module.sass
+
+@keyframes fadeIn
+  from
+    opacity: 0
+    transform: translateY(10px)
+  to
+    opacity: 1
+    transform: translateY(0)

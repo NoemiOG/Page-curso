@@ -1,215 +1,215 @@
 import { useState, useMemo } from 'react';
+import { StyledEngineProvider, createTheme, ThemeProvider } from '@mui/material/styles';
+import { 
+  useMediaQuery, useTheme, AppBar, Toolbar, Box, Button, IconButton, CssBaseline 
+} from '@mui/material';
+import {
+  Menu as MenuIcon, Brightness4 as Brightness4Icon, Brightness7 as Brightness7Icon,
+  AccountCircle as ProfileIcon, Home as HomeIcon, Logout as LogoutIcon
+} from '@mui/icons-material';
+
+// Componentes
 import Login from './components/login/login'; 
 import Sidebar from './components/barra/sidebar';
 import MainContent from './components/presentation/MainContent';
 import Welcome from './components/Bienvenida/Bienvenida'; 
 import Avance from './components/examen/Avance'; 
 import Perfil from './components/Perfil/Perfil';
+
+// Estilos y Assets
 import styles from './components/App.module.sass';
 import dataCursos from './components/data/cursos.json';
-import logoChakray from './assets/logo.png';
+import logoChakray from './assets/chakraylogo.png'; 
+import logoChakraydark from './assets/logo.png'; 
 
 function App() {
+  const [mode, setMode] = useState('light'); 
   const [isLogged, setIsLogged] = useState(false);
   const [courseSelected, setCourseSelected] = useState(null); 
   const [currentPage, setCurrentPage] = useState(null);       
   const [viewMode, setViewMode] = useState('course'); 
   const [userAnswers, setUserAnswers] = useState({}); 
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const themeMUI = useTheme();
+  const isMobile = useMediaQuery('(max-width:900px)');
 
   const [userData, setUserData] = useState({
     nombre: "Ingeniño 1",
-    email: "estudiante@chakray.mx"
+    email: "ingeniero@chakray.mx"
   });
 
-  // --- 1. FUNCIÓN AUXILIAR DE CONTEO ---
-  // Calcula la cantidad de aciertos para un curso específico comparando las respuestas proporcionadas contra el JSON de datos.
-  const calcularAciertosDeCurso = (curso, respuestas) => {
-    const examen = curso.secciones?.find(s => s.tipo === 'examen');
-    if (!examen) return 0;
+  const theme = useMemo(() => createTheme({
+    palette: {
+      mode: mode,
+      primary: { main: '#E11F26' },
+      background: {
+        default: mode === 'dark' ? '#111111' : '#FFFFFF',
+        paper: mode === 'dark' ? '#49494A' : '#EDEDED',
+      },
+      text: { 
+        primary: mode === 'dark' ? '#FFFFFF' : '#111111',
+        secondary: '#878787',
+      },
+      divider: mode === 'dark' ? '#49494A' : '#CCCCCC',
+    },
+    typography: { fontFamily: '"Roboto", sans-serif' },
+  }), [mode]);
 
-    let aciertos = 0;
-    examen.preguntas.forEach(p => {
-      const respUser = respuestas[`${curso.id}_${p.id}`];
-      const respCorrecta = p.respuestaCorrecta;
-      
-      if (p.esMultiple) {
-        if (Array.isArray(respUser) && Array.isArray(respCorrecta)) {
-          const esIgual = respUser.length === respCorrecta.length &&
-                          respUser.every(val => respCorrecta.includes(val));
-          if (esIgual) aciertos++;
-        }
-      } else {
-        if (respUser == respCorrecta) aciertos++;
-      }
-    });
-    return aciertos;
-  };
+  const currentLogo = mode === 'dark' ? logoChakraydark : logoChakray;
 
-  // --- 2. LÓGICA DE ESTADÍSTICAS ---
-  // Memoriza el cálculo de estadísticas globales para evitar re-renderizados innecesarios, procesando el promedio general de los exámenes realizados.
-  const statsGlobales = useMemo(() => {
-    let sumaPorcentajes = 0;
-    let examenesRealizados = 0;
+  // --- LÓGICA DE NAVEGACIÓN CORREGIDA ---
 
-    dataCursos.forEach(curso => {
-      const examen = curso.secciones?.find(s => s.tipo === 'examen');
-      if (!examen) return;
-
-      const tieneRespuestas = examen.preguntas.some(p => 
-        userAnswers[`${curso.id}_${p.id}`] !== undefined
-      );
-
-      if (tieneRespuestas) {
-        examenesRealizados++;
-        const aciertos = calcularAciertosDeCurso(curso, userAnswers);
-        sumaPorcentajes += (aciertos / examen.preguntas.length) * 100;
-      }
-    });
-
-    return {
-      totalIniciados: examenesRealizados,
-      promedioGeneral: examenesRealizados > 0 ? Math.round(sumaPorcentajes / examenesRealizados) : 0
-    };
-  }, [userAnswers]);
-
-  // --- 3. MANEJADORES DE ESTADO ---
-  
-  // Establece el estado de autenticación y actualiza la información del usuario tras un inicio de sesión exitoso.
-  const handleLogin = (email) => {
-    setUserData(prev => ({ ...prev, email }));
-    setIsLogged(true);
-  };
-
-  // Restablece todos los estados globales a sus valores iniciales para finalizar la sesión del usuario.
-  const handleLogout = () => {
-    setIsLogged(false);
-    setCourseSelected(null);
-    setCurrentPage(null);
-    setUserAnswers({});
-    setViewMode('course');
-  };
-
-  // Cambia la vista activa hacia el perfil del usuario.
-  const handleGoProfile = () => setViewMode('profile');
-  
-  // Restablece la navegación hacia la pantalla de bienvenida o menú principal.
+  // 1. Volver a la Bienvenida (Limpia el curso seleccionado)
   const handleGoHome = () => {
     setCourseSelected(null);
     setCurrentPage(null);
     setViewMode('course');
+    if (isMobile) setSidebarOpen(false);
   };
 
-  // Define el curso seleccionado y establece la primera sección del mismo como página activa.
-  const handleSelectCurso = (curso) => {
-    setCourseSelected(curso);
-    if (curso.secciones?.length > 0) {
-      setCurrentPage(curso.secciones[0]);
-    }
-    setViewMode('course');
-  };
-
-  // Actualiza la sección o tema específico que el usuario desea visualizar.
-  const handleSelectPage = (page) => {
-    setCurrentPage(page);
-    setViewMode('course'); 
-  };
-
-  // --- 4. GESTIÓN DE EXÁMENES ---
-
-  // Procesa la finalización de un examen, comparando el nuevo resultado con el anterior para conservar únicamente la calificación más alta.
-  const handleFinishExamen = (respuestasNuevas) => {
-    setUserAnswers(prev => {
-      const primeraLlave = Object.keys(respuestasNuevas)[0];
-      if (!primeraLlave) return prev;
-      const cursoId = primeraLlave.split('_')[0];
-      
-      const cursoData = dataCursos.find(c => c.id.toString() === cursoId.toString());
-      
-      const nuevosAciertos = calcularAciertosDeCurso(cursoData, respuestasNuevas);
-      const viejosAciertos = calcularAciertosDeCurso(cursoData, prev);
-
-      if (nuevosAciertos >= viejosAciertos) {
-        return { ...prev, ...respuestasNuevas };
-      } else {
-        console.log("Se conserva el puntaje anterior por ser más alto.");
-        return prev;
-      }
-    });
+  // 2. Finalizar Examen y Enviar (Guarda y cambia a vista de resultados)
+  const handleSaveAnswers = (respuestasDelExamen) => {
+    setUserAnswers(prev => ({
+      ...prev,
+      ...respuestasDelExamen 
+    }));
+    // Esta línea es la que te manda automáticamente al componente Avance
     setViewMode('progress'); 
   };
 
-  // Elimina las respuestas almacenadas de un curso específico y redirige al usuario a la vista de contenido.
   const handleResetExamen = (cursoId) => {
     setUserAnswers(prev => {
-      const limpias = { ...prev };
-      Object.keys(limpias).forEach(key => {
-        if (key.startsWith(`${cursoId}_`)) delete limpias[key];
+      const nuevasRespuestas = { ...prev };
+      Object.keys(nuevasRespuestas).forEach(key => {
+        if (key.startsWith(`${cursoId}_`)) {
+          delete nuevasRespuestas[key];
+        }
       });
-      return limpias;
+      return nuevasRespuestas;
     });
-    setViewMode('course');
+    setViewMode('course'); 
   };
 
-  // Renderiza el componente de inicio de sesión si el usuario no está autenticado.
-  if (!isLogged) return <Login onLogin={handleLogin} />;
+  const handleLogout = () => {
+    setIsLogged(false);
+    handleGoHome();
+  };
+
+  const handleToggleTheme = () => {
+    const newMode = mode === 'dark' ? 'light' : 'dark';
+    setMode(newMode);
+    document.documentElement.setAttribute('data-theme', newMode);
+  };
+
+ if (!isLogged) return (
+  <Login 
+    onLogin={() => setIsLogged(true)} 
+    mode={mode} // Pasamos el modo actual ('light' o 'dark')
+  />
+);
+
+  const shouldShowSidebar = courseSelected && viewMode === 'course';
 
   return (
-    <div className={styles.appContainer}>
-      {/* Muestra la barra lateral solo durante la navegación de cursos */}
-      {courseSelected && viewMode === 'course' && (
-        <Sidebar 
-          cursoActual={courseSelected} 
-          cursos={dataCursos} 
-          activeId={currentPage?.id} 
-          onSelect={handleSelectPage} 
-          onShowProgress={() => setViewMode('progress')}
-          userAnswers={userAnswers} 
-        />
-      )}
-      
-      <div className={styles.mainWrapper}>
-        <header className={styles.header}>
-          <div className={styles.headerLeft} />
-          <div className={styles.logoContainer}>
-            <img src={logoChakray} alt="Logo" className={styles.logo} onClick={handleGoHome} />
-          </div>
-          <div className={styles.headerRight}>
-            <button onClick={handleGoProfile} className={styles.btnNav}>MI PERFIL</button>
-            <button onClick={handleLogout} className={styles.btnLogout}>CERRAR SESIÓN</button>
-          </div>
-        </header>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+          
+          <AppBar position="static" sx={{ 
+            backgroundImage: 'none', boxShadow: 'none', bgcolor: 'background.default',
+            borderBottom: `1px solid ${theme.palette.divider}`, color: 'text.primary', zIndex: 1201
+          }}>
+            <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1, sm: 2 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {shouldShowSidebar && (
+                  <IconButton onClick={() => setSidebarOpen(!sidebarOpen)} color="inherit">
+                    <MenuIcon />
+                  </IconButton>
+                )}
+                <img src={currentLogo} alt="Logo" style={{ height: '35px', cursor: 'pointer' }} onClick={handleGoHome} />
+              </Box>
 
-        <main className={styles.contentArea}>
-          {/* Renderizado condicional de vistas según el modo activo */}
-          {viewMode === 'profile' ? (
-            <Perfil 
-                usuario={userData} 
-                stats={statsGlobales} 
-                onBack={handleGoHome} 
-                cursos={dataCursos}      // <--- Pasamos la lista de cursos
-                userAnswers={userAnswers} // <--- Pasamos las respuestas para el cálculo
-            />
-          ) : viewMode === 'progress' ? (
-            <Avance 
-              cursos={dataCursos} 
-              userAnswers={userAnswers}
-              onContinuar={handleGoHome} 
-              onResetExamen={handleResetExamen}
-            />
-          ) : courseSelected ? (
-            <MainContent 
-              activePage={currentPage} 
-              cursos={dataCursos}
-              onSelect={handleSelectPage}
-              onFinishExamen={handleFinishExamen}
-              userAnswers={userAnswers}
-            />
-          ) : (
-            <Welcome cursos={dataCursos} onSelectCurso={handleSelectCurso} />
-          )}
-        </main>
-      </div>
-    </div>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <IconButton onClick={handleToggleTheme} color="inherit">
+                  {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                </IconButton>
+                <Button startIcon={<HomeIcon />} color="inherit" onClick={handleGoHome}>Inicio</Button>
+                <Button startIcon={<ProfileIcon />} color="inherit" onClick={() => setViewMode('profile')}>Perfil</Button>
+                <IconButton onClick={handleLogout} color="error"><LogoutIcon /></IconButton>
+              </Box>
+            </Toolbar>
+          </AppBar>
+
+          <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden', position: 'relative' }}>
+            
+            {shouldShowSidebar && (
+              <Sidebar 
+                cursoActual={courseSelected} 
+                activeId={currentPage?.id} 
+                onSelect={setCurrentPage} 
+                onShowProgress={() => setViewMode('progress')}
+                open={sidebarOpen} 
+                setOpen={setSidebarOpen} 
+                userAnswers={userAnswers} 
+              />
+            )}
+            
+            <Box 
+              component="main"
+              sx={{ 
+                flexGrow: 1, overflowY: 'auto', overflowX: 'hidden',
+                display: 'flex', flexDirection: 'column', bgcolor: 'background.default',
+              }}
+            >
+              <Box sx={{ flexGrow: 1, width: '100%' }}>
+                {viewMode === 'profile' ? (
+                  <Perfil 
+                    usuario={userData} 
+                    cursos={dataCursos} 
+                    userAnswers={userAnswers} 
+                    onBack={handleGoHome} // Al volver del perfil, va a bienvenida
+                  />
+                ) : viewMode === 'progress' ? (
+                  <Avance 
+                    cursos={dataCursos} 
+                    userAnswers={userAnswers} 
+                    onContinuar={handleGoHome} // Al dar "Volver a cursos", va a bienvenida
+                    onResetExamen={handleResetExamen} 
+                  />
+                ) : courseSelected ? (
+                  <MainContent 
+                    activePage={currentPage} 
+                    cursos={dataCursos} 
+                    onSelect={setCurrentPage}
+                    userAnswers={userAnswers}
+                    onSaveAnswers={handleSaveAnswers} // Esta función guarda y dispara la vista Avance
+                    onResetExamen={handleResetExamen}
+                    setViewMode={setViewMode}
+                  />
+                ) : (
+                  <Welcome 
+                    cursos={dataCursos} 
+                    onSelectCurso={(c) => { 
+                      setCourseSelected(c); 
+                      setCurrentPage(c.secciones[0]); 
+                      setViewMode('course'); 
+                    }} 
+                  />
+                )}
+              </Box>
+
+              <footer className={styles.footer} style={{ width: '100%', marginTop: 'auto' }}>
+                <p>© 2026 Chakray</p>
+                <a href="#mapa">MAPA DEL SITIO</a>
+              </footer>
+            </Box>
+          </Box>
+        </Box>
+      </ThemeProvider>
+    </StyledEngineProvider>
   );
 }
 

@@ -1,71 +1,86 @@
-@import ../presentation/variables
-
 .container
-  height: 100vh
   display: flex
-  justify-content: center
   align-items: center
-  background-color: #f4f4f4
+  justify-content: center
+  min-height: 100vh
+  background-color: var(--bg-app)
+  transition: background-color 0.3s ease
 
 .card
-  display: flex
-  flex-direction: column
-  align-items: center
-  background: white
-  padding: 30px
+  background-color: var(--bg-card)
+  padding: 3rem
   border-radius: 20px
-  box-shadow: 0 10px 35px rgba(0,0,0,0.1)
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1)
   width: 100%
-  max-width: 500px
+  max-width: 400px
   text-align: center
+  border: 1px solid var(--border-color)
+  animation: fadeIn 0.8s ease-out
 
-.logoContainer
-  width: 100%
-  display: flex
-  justify-content: center
-  margin-bottom: 6rem 
-
-.logo
-  max-width: 250px 
-  height: auto
-  object-fit: contain
-  margin-bottom: 10px
+.header
+  margin-bottom: 2.5rem
   
+  .logo
+    width: 300px
+    height: auto
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1))
 
 .form
   display: flex
   flex-direction: column
+  gap: 1.5rem
 
 .inputGroup
+  position: relative
   display: flex
   align-items: center
-  background: #eee
-  border-radius: 10px
-  padding: 10px
-  margin-bottom: 20px
-  border: 1px solid transparent
-  transition: border-color 0.3s
-
-  &:focus-within
-    border-color: #61001a
+  
+  .inputIcon
+    position: absolute
+    left: 15px
+    font-size: 1.2rem
+    color: var(--text-main)
+    opacity: 0.6
 
   input
-    border: none
-    background: none
-    outline: none
     width: 100%
-    padding-left: 12px
-    
-    // Estilo cuando hay error
+    padding: 15px 15px 15px 45px
+    border-radius: 8px
+    border: 2px solid var(--border-color)
+    background-color: var(--bg-app)
+    color: var(--text-main)
+    font-family: $font-main
+    font-size: 1rem
+    transition: all 0.3s ease
+
+    &:focus
+      outline: none
+      // Ajustado a $color-red según tus variables
+      border-color: $color-red 
+      box-shadow: 0 0 0 4px rgba($color-red, 0.1)
+
     &.errorInput
-      color: #49494A
+      border-color: #ff4d4d
+      background-color: rgba(255, 77, 77, 0.05)
 
 .errorText
   color: #ff4d4d
-  font-size: 0.8rem
-  margin-top: -10px
-  margin-bottom: 10px
+  font-size: 0.85rem
+  margin-top: -1rem
   text-align: left
+  font-weight: 600
 
 .btnAcceder
-  @extend .btn-primary
+  @extend .btn-primary  // Hereda estilos, sombras y hover de variables.sass
+  margin-top: 1rem
+  width: 100%
+  font-size: 1.1rem
+
+// Animación de entrada
+@keyframes fadeIn
+  from
+    opacity: 0
+    transform: translateY(-20px)
+  to
+    opacity: 1
+    transform: translateY(0)

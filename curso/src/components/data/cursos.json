@@ -17,24 +17,33 @@
         { "id": 5, "color": "#3498db", "content": "Perfecto" },
         { "id": 6, "color": "#9b59b6", "content": "¡Puedes tomar el siguiente curso!" }
   
-  ]
+        ]
       },
       {
         "id": "1b",
-        "tipo": "tema1",
-        "label": "CONTENIDO",
-        "tituloTema": "AQUI VA OTRO TEMA MAS PADRE",
-        "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
+        "tipo": "presentacion_externa", 
+        "label": "TEMA 2",
+        "tituloTema": "AQUI VA UN TEMA BIEN PADRE",
+        "url": "/presentación.pdf#zoom=125&navpanes=0&toolbar=0",
+        "textoLargo": "una introducción divis, divis"
       },
       {
         "id": "1c",
+        "tipo": "presentacion_externa",
+        "label": "CONTENIDO",
+        "tituloTema": "AQUI VA OTRO TEMA MAS PADRE",
+        "url": "/chakray.pdf#zoom=100&navpanes=0&toolbar=0",
+        "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
+      },
+      {
+        "id": "1d",
         "tipo": "tema2",
         "label": "CONTENIDO1",
         "tituloTema": "Porque uno no es ninguno, mas temas padres",
         "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
       },
       {
-        "id": "1d",
+        "id": "1e",
         "tipo": "examen",
         "label": "EXAMEN",
         "tituloTema": "EXAMEN",

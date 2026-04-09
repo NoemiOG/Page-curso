@@ -1,65 +1,61 @@
-@import ./presentation/variables
-
-$header-height: 80px
+// NOTA: No necesitas importar nada, Vite ya inyectó tus variables.
 
 .appContainer
   display: flex
-  height: 100vh 
+  flex-direction: column
+  min-height: 100vh
   width: 100%
-  background-color: $color-gris-light
-  overflow: hidden 
+  background-color: var(--bg-app)
 
 .mainWrapper
+  width: 100%
+  overflow: hidden
+  
+.contentArea
   flex: 1
   display: flex
   flex-direction: column
-  height: 100vh 
-  overflow: hidden
-
-.header
-  height: $header-height
-  display: flex
-  align-items: center
-  justify-content: space-between
-  padding: 0 2rem
-  background-color: $color-gris-dark
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1)
-  position: relative
-  z-index: 100
-
-  .headerRight
-    display: flex
-    gap: 1rem
-    align-items: center
-
-    .btnNav, .btnLogout
-      @extend .btn-primary
-      padding: 8px 16px
-      font-size: $font-size-xs
-      &.btnLogout
-        background-color: transparent
-        border: 1px solid $color-white
-        &:hover
-          background-color: $color-rojo-bright
-          border-color: transparent
-
-  .logo
-    height: 50px
-    width: auto
-    position: absolute
-    left: 50%
-    top: 50%
-    transform: translate(-50%, -50%)
-    transition: transform 0.3s ease
-    &:hover
-      transform: translate(-50%, -50%) scale(1.05)
-
-.contentArea
-  flex: 1
-  overflow-y: auto 
-  background-color: $color-smokey-white
+  width: 100%
+  
+  // Usamos $color-steel directamente desde variables.sass
   &::-webkit-scrollbar
     width: 8px
   &::-webkit-scrollbar-thumb
-    background: $color-gris
+    background: $color-steel
     border-radius: 10px
+
+.footer
+  background-color: var(--bg-card)
+  color: var(--text-main)
+  display: flex
+  justify-content: space-around
+  align-items: center
+  padding: 1.5rem
+  border-top: 1px solid var(--border-color)
+  margin-top: auto
+
+.copyright
+  font-weight: bold
+  opacity: 0.8
+  font-family: $font-main
+
+.mapaLink
+  color: var(--text-main)
+  text-decoration: none
+  font-weight: 900
+  font-family: $font-main
+  transition: color 0.2s ease
+  
+  &:hover
+    // Usamos $color-red directamente
+    color: $color-red
+
+    :global(#root)
+  display: flex
+  width: 100%
+  height: 100vh
+  overflow: hidden // Evita que aparezca la doble barra de scroll
+
+:global(.MuiBox-root)
+  // Esto limpia cualquier margen que MUI meta por error en contenedores genéricos
+  box-sizing: border-box

@@ -1,47 +1,111 @@
-@import '../presentation/variables'
-
 .examenWrapper
-  padding: 3rem
-  background-color: $color-white
+  padding: 2rem
+  background-color: var(--bg-card)
   border-radius: 20px
-  margin: 20px
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1)
-  font-family: $font-main
+  margin: 20px auto
+  max-width: 900px
+  border: 1px solid var(--border-color)
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1)
+  animation: fadeIn 0.6s ease-out
+  color: var(--text-main)
 
-  // Sobreescribir el botón de SurveyJS 
-  :global(.sd-btn--action)
-    background-color: $color-gris-dark !important
-    color: $color-white !important
-    padding: 12px 35px !important
-    border-radius: 8px !important
-    font-weight: bold !important
-    text-transform: uppercase !important
-    transition: all 0.3s ease !important
-    border: none !important
+  // --- Personalización profunda de SurveyJS con soporte de Temas ---
+  :global(.sd-root-modern)
+    // Forzamos el fondo del contenedor principal para que no haya fugas blancas
+    --sjs-general-backcolor: var(--bg-card) !important
+    --sjs-font-family: #{$font-main}
+    --sjs-base-unit: 8px
     
-    &:hover
-      background-color: $color-rojo-bright !important
-      transform: translateY(-2px)
-      box-shadow: 0 5px 15px rgba($color-rojo-bright, 0.3)
+    // Variables dinámicas que heredan de tu tema
+    --sjs-general-forecolor: var(--text-main) !important
+    --sjs-question-background: var(--bg-app) !important
+    --sjs-questionpanel-backcolor: var(--bg-card) !important
+    --sjs-border-default: var(--border-color) !important
+    --sjs-primary-backcolor: #{$color-red}
+    --sjs-primary-forecolor: #{$color-white}
 
-  // Color de los Radio Buttons y Checkboxes (Seleccionados)
+    // Eliminamos el fondo blanco de las tarjetas de preguntas
+    :global(.sd-question)
+      background-color: var(--bg-app) !important
+      color: var(--text-main) !important
+      border: 1px solid var(--border-color) !important
+
+    // Ajuste del cuerpo del examen
+    :global(.sd-body)
+      background-color: var(--bg-card) !important
+
+  // Título del Examen
+  :global(.sd-title)
+    color: var(--text-main) !important
+    font-family: $font-bold
+    font-size: 1.8rem
+    text-transform: uppercase
+    letter-spacing: 1px
+
+  // Preguntas
+  :global(.sd-question__title)
+    color: var(--text-main) !important
+    font-weight: 700
+    margin-bottom: 15px
+
+  // Input de texto
+  :global(.sd-input)
+    background-color: var(--bg-app) !important
+    color: var(--text-main) !important
+    border: 1px solid var(--border-color) !important
+    &:focus
+      border-color: $color-red !important
+
+  // Botones de acción
+  :global(.sd-btn--action)
+    background-color: $color-red !important
+    color: $color-white !important
+    border-radius: 4px !important
+    font-family: $font-main
+    font-weight: 700
+    text-transform: uppercase
+    transition: all 0.2s ease
+    border: none
+    padding: 12px 24px
+    box-shadow: 0 4px 0 #{darken($color-red, 15%)}
+
+    &:hover
+      transform: translateY(-2px)
+      background-color: #{darken($color-red, 5%)} !important
+      box-shadow: 0 6px 0 #{darken($color-red, 20%)}
+
+  // Barra de progreso
+  :global(.sd-progress)
+    background-color: rgba($color-red, 0.1) !important
+    height: 12px
+    border-radius: 10px
+
+  :global(.sd-progress__bar)
+    background-color: $color-red !important
+
+  // Radio buttons y Checkboxes (Decorator es el círculo/cuadrado)
+  :global(.sd-item__decorator)
+    border-color: var(--border-color) !important
+    background-color: var(--bg-app) !important
+
+  :global(.sd-item--checked .sd-item__decorator)
+    background-color: $color-red !important
+    border-color: $color-red !important
+
   :global(.sd-item--checked .sd-radio__svg),
   :global(.sd-item--checked .sd-checkbox__svg)
-    fill: $color-rojo-bright !important
+    fill: $color-white !important
 
-  // Color de la barra de progreso
-  :global(.sd-progress__bar)
-    background-color: $color-rojo-bright !important
+  // Texto de las opciones
+  :global(.sd-item__control-label)
+    color: var(--text-main) !important
 
-  // Ajuste de los títulos de las preguntas
-  :global(.sd-question__title)
-    color: $color-midnight !important
-    font-size: 1.2rem !important
-    font-weight: 700 !important
-    margin-bottom: 1rem !important
+@keyframes fadeIn
+  from
+    opacity: 0
+    transform: translateY(15px)
+  to
+    opacity: 1
+    transform: translateY(0)
 
-  // Quitar el borde de las tarjetas de SurveyJS 
-  :global(.sd-question)
-    border: none !important
-    background: transparent !important
-    padding: 1.5rem 0 !important
+    
