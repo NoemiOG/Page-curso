@@ -17,6 +17,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-icons": "^5.6.0",
+    "react-router-dom": "^7.14.0",
     "sass": "^1.98.0",
     "survey-core": "^2.5.16",
     "survey-react-ui": "^2.5.16"

@@ -1,7 +1,8 @@
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'; 
 import { useState, useMemo } from 'react';
 import { StyledEngineProvider, createTheme, ThemeProvider } from '@mui/material/styles';
 import { 
-  useMediaQuery, useTheme, AppBar, Toolbar, Box, Button, IconButton, CssBaseline 
+  useMediaQuery, useTheme, AppBar, Toolbar, Box, Button, IconButton, CssBaseline, Tooltip 
 } from '@mui/material';
 import {
   Menu as MenuIcon, Brightness4 as Brightness4Icon, Brightness7 as Brightness7Icon,
@@ -23,21 +24,25 @@ import logoChakray from './assets/chakraylogo.png';
 import logoChakraydark from './assets/logo.png'; 
 
 function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const [mode, setMode] = useState('light'); 
   const [isLogged, setIsLogged] = useState(false);
   const [courseSelected, setCourseSelected] = useState(null); 
   const [currentPage, setCurrentPage] = useState(null);       
-  const [viewMode, setViewMode] = useState('course'); 
   const [userAnswers, setUserAnswers] = useState({}); 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const themeMUI = useTheme();
   const isMobile = useMediaQuery('(max-width:900px)');
 
   const [userData, setUserData] = useState({
     nombre: "Ingeniño 1",
     email: "ingeniero@chakray.mx"
   });
+
+  // LÓGICA DE VISIBILIDAD DE SIDEBAR: Solo se activa en la ruta del curso
+  const shouldShowSidebar = courseSelected && location.pathname === '/curso-detalle';
 
   const theme = useMemo(() => createTheme({
     palette: {
@@ -58,42 +63,34 @@ function App() {
 
   const currentLogo = mode === 'dark' ? logoChakraydark : logoChakray;
 
-  // --- LÓGICA DE NAVEGACIÓN CORREGIDA ---
+  // --- HANDLERS ---
 
-  // 1. Volver a la Bienvenida (Limpia el curso seleccionado)
   const handleGoHome = () => {
     setCourseSelected(null);
     setCurrentPage(null);
-    setViewMode('course');
+    navigate('/inicio'); 
     if (isMobile) setSidebarOpen(false);
   };
 
-  // 2. Finalizar Examen y Enviar (Guarda y cambia a vista de resultados)
   const handleSaveAnswers = (respuestasDelExamen) => {
-    setUserAnswers(prev => ({
-      ...prev,
-      ...respuestasDelExamen 
-    }));
-    // Esta línea es la que te manda automáticamente al componente Avance
-    setViewMode('progress'); 
+    setUserAnswers(prev => ({ ...prev, ...respuestasDelExamen }));
+    navigate('/avance'); 
   };
 
   const handleResetExamen = (cursoId) => {
     setUserAnswers(prev => {
       const nuevasRespuestas = { ...prev };
       Object.keys(nuevasRespuestas).forEach(key => {
-        if (key.startsWith(`${cursoId}_`)) {
-          delete nuevasRespuestas[key];
-        }
+        if (key.startsWith(`${cursoId}_`)) delete nuevasRespuestas[key];
       });
       return nuevasRespuestas;
     });
-    setViewMode('course'); 
+    navigate('/inicio'); 
   };
 
   const handleLogout = () => {
     setIsLogged(false);
-    handleGoHome();
+    navigate('/'); 
   };
 
   const handleToggleTheme = () => {
@@ -102,14 +99,7 @@ function App() {
     document.documentElement.setAttribute('data-theme', newMode);
   };
 
- if (!isLogged) return (
-  <Login 
-    onLogin={() => setIsLogged(true)} 
-    mode={mode} // Pasamos el modo actual ('light' o 'dark')
-  />
-);
-
-  const shouldShowSidebar = courseSelected && viewMode === 'course';
+  if (!isLogged) return <Login onLogin={() => setIsLogged(true)} mode={mode} />;
 
   return (
     <StyledEngineProvider injectFirst>
@@ -129,16 +119,46 @@ function App() {
                     <MenuIcon />
                   </IconButton>
                 )}
-                <img src={currentLogo} alt="Logo" style={{ height: '35px', cursor: 'pointer' }} onClick={handleGoHome} />
+                <img 
+                  src={currentLogo} 
+                  alt="Logo" 
+                  style={{ height: isMobile ? '28px' : '35px', cursor: 'pointer' }} 
+                  onClick={handleGoHome} 
+                />
               </Box>
 
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <IconButton onClick={handleToggleTheme} color="inherit">
-                  {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-                </IconButton>
-                <Button startIcon={<HomeIcon />} color="inherit" onClick={handleGoHome}>Inicio</Button>
-                <Button startIcon={<ProfileIcon />} color="inherit" onClick={() => setViewMode('profile')}>Perfil</Button>
-                <IconButton onClick={handleLogout} color="error"><LogoutIcon /></IconButton>
+              <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 } }}>
+                <Tooltip title="Cambiar Tema">
+                  <IconButton onClick={handleToggleTheme} color="inherit">
+                    {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                  </IconButton>
+                </Tooltip>
+
+                <Tooltip title="Inicio">
+                  {isMobile ? (
+                    <IconButton color="inherit" onClick={() => navigate('/inicio')}>
+                      <HomeIcon />
+                    </IconButton>
+                  ) : (
+                    <Button startIcon={<HomeIcon />} color="inherit" onClick={() => navigate('/inicio')}>Inicio</Button>
+                  )}
+                </Tooltip>
+
+                <Tooltip title="Mi Perfil">
+                  {isMobile ? (
+                    <IconButton color="inherit" onClick={() => navigate('/perfil')}>
+                      <ProfileIcon />
+                    </IconButton>
+                  ) : (
+                    <Button startIcon={<ProfileIcon />} color="inherit" onClick={() => navigate('/perfil')}>Perfil</Button>
+                  )}
+                </Tooltip>
+
+                <Tooltip title="Cerrar Sesión">
+                  <IconButton onClick={handleLogout} color="error">
+                    <LogoutIcon />
+                  </IconButton>
+                </Tooltip>
               </Box>
             </Toolbar>
           </AppBar>
@@ -150,60 +170,60 @@ function App() {
                 cursoActual={courseSelected} 
                 activeId={currentPage?.id} 
                 onSelect={setCurrentPage} 
-                onShowProgress={() => setViewMode('progress')}
+                onShowProgress={() => navigate('/avance')}
                 open={sidebarOpen} 
                 setOpen={setSidebarOpen} 
                 userAnswers={userAnswers} 
               />
             )}
             
-            <Box 
-              component="main"
-              sx={{ 
-                flexGrow: 1, overflowY: 'auto', overflowX: 'hidden',
-                display: 'flex', flexDirection: 'column', bgcolor: 'background.default',
-              }}
-            >
+            <Box component="main" sx={{ flexGrow: 1, overflowY: 'auto', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ flexGrow: 1, width: '100%' }}>
-                {viewMode === 'profile' ? (
-                  <Perfil 
-                    usuario={userData} 
-                    cursos={dataCursos} 
-                    userAnswers={userAnswers} 
-                    onBack={handleGoHome} // Al volver del perfil, va a bienvenida
-                  />
-                ) : viewMode === 'progress' ? (
-                  <Avance 
-                    cursos={dataCursos} 
-                    userAnswers={userAnswers} 
-                    onContinuar={handleGoHome} // Al dar "Volver a cursos", va a bienvenida
-                    onResetExamen={handleResetExamen} 
-                  />
-                ) : courseSelected ? (
-                  <MainContent 
-                    activePage={currentPage} 
-                    cursos={dataCursos} 
-                    onSelect={setCurrentPage}
-                    userAnswers={userAnswers}
-                    onSaveAnswers={handleSaveAnswers} // Esta función guarda y dispara la vista Avance
-                    onResetExamen={handleResetExamen}
-                    setViewMode={setViewMode}
-                  />
-                ) : (
-                  <Welcome 
-                    cursos={dataCursos} 
-                    onSelectCurso={(c) => { 
-                      setCourseSelected(c); 
-                      setCurrentPage(c.secciones[0]); 
-                      setViewMode('course'); 
-                    }} 
-                  />
-                )}
+                <Routes>
+                  <Route path="/" element={<Navigate to="/inicio" />} />
+                  
+                  <Route path="/inicio" element={
+                    <Welcome 
+                      cursos={dataCursos} 
+                      onSelectCurso={(c) => { 
+                        setCourseSelected(c); 
+                        setCurrentPage(c.secciones[0]); 
+                        navigate('/curso-detalle'); 
+                      }} 
+                    />
+                  } />
+
+                  <Route path="/perfil" element={
+                    <Perfil usuario={userData} cursos={dataCursos} userAnswers={userAnswers} onBack={handleGoHome} />
+                  } />
+
+                  <Route path="/avance" element={
+                    <Avance 
+                       cursos={dataCursos} 
+                       userAnswers={userAnswers} 
+                       onContinuar={handleGoHome} 
+                       onResetExamen={handleResetExamen} 
+                       cursoIdFiltrado={courseSelected?.id} 
+                    />
+                  } />
+
+                  <Route path="/curso-detalle" element={
+                    courseSelected ? (
+                      <MainContent 
+                        activePage={currentPage} 
+                        cursos={dataCursos} 
+                        onSelect={setCurrentPage}
+                        userAnswers={userAnswers}
+                        onSaveAnswers={handleSaveAnswers}
+                        onResetExamen={handleResetExamen}
+                      />
+                    ) : <Navigate to="/inicio" />
+                  } />
+                </Routes>
               </Box>
 
               <footer className={styles.footer} style={{ width: '100%', marginTop: 'auto' }}>
                 <p>© 2026 Chakray</p>
-                <a href="#mapa">MAPA DEL SITIO</a>
               </footer>
             </Box>
           </Box>

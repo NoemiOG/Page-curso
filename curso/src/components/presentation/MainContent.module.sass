@@ -44,15 +44,21 @@
   box-shadow: 0 10px 30px rgba(0,0,0,0.1)
   margin-bottom: 40px
 
+@media (max-width: 600px)
+  .contentWrapper
+    padding: 20px 10px 40px // Menos espacio en las orillas para el celular
+
 .viewerFrame
   width: 100%
-  // CLAVE PARA EL TAMAÑO: Altura dinámica (ViewPort Height)
-  height: 85vh // <--- Ocupará el 85% del alto de la pantalla total
+  // Reducimos un poco para que los botones de navegación sean visibles siempre
+  height: 70vh 
   background-color: $color-midnight
-  border-radius: 8px
+  border-radius: 12px // Un poco más redondeado para suavizar
   overflow: hidden
   margin-bottom: 20px
   border: 1px solid var(--border-color)
+  // Añadimos una sombra interna para dar profundidad
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.2)
 
 .pdfElement
   width: 100%

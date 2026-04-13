@@ -7,12 +7,10 @@ const MainContent = ({
   activePage, 
   cursos = [], 
   onSelect, 
-  onSaveAnswers, // Viene de App.jsx (guarda resultados y cambia a viewMode: 'progress')
+  onSaveAnswers, 
   userAnswers,   
-  onResetExamen, 
-  viewMode,      
-  setViewMode,    
-  onGoHome       // Nueva prop para resetear a la Bienvenida
+  onResetExamen,
+  // Eliminamos viewMode y setViewMode ya que usamos React Router ahora
 }) => {
 
   const cursoActual = cursos.find(c => 
@@ -24,7 +22,7 @@ const MainContent = ({
   const siguienteSeccion = secciones[indexActual + 1];
   const anteriorSeccion = secciones[indexActual - 1];
 
-  // Reset del scroll al cambiar de tema
+  // Reset del scroll al cambiar de tema para que el usuario siempre empiece arriba
   useEffect(() => {
     const container = document.getElementById('mainScrollContainer');
     if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
@@ -32,23 +30,7 @@ const MainContent = ({
 
   if (!activePage) return <div className={styles.emptyState}>Selecciona un tema para comenzar</div>;
 
-  // --- 1. VISTA DE RESULTADOS (AVANCE) ---
-  if (viewMode === 'progress') {
-    return (
-      <div className={styles.fullView}>
-        <Avance 
-          cursos={cursos} 
-          userAnswers={userAnswers} 
-          // Al dar clic en "Volver a mis cursos", ejecutamos la limpieza hacia la Bienvenida
-          onContinuar={onGoHome} 
-          onResetExamen={onResetExamen}
-          cursoIdFiltrado={cursoActual?.id} 
-        />
-      </div>
-    );
-  }
-
-  // --- 2. VISTA DE EXAMEN ---
+  // --- 1. VISTA DE EXAMEN ---
   if (activePage.tipo === 'examen') {
     return (
       <div className={styles.fullView}>
@@ -56,7 +38,6 @@ const MainContent = ({
           data={activePage} 
           cursoId={cursoActual?.id} 
           onFinish={(respuestas) => { 
-            // Esto guarda los datos y cambia el viewMode a 'progress' en App.jsx
             onSaveAnswers(respuestas); 
           }} 
         />
@@ -64,7 +45,7 @@ const MainContent = ({
     );
   }
 
-  // --- 3. VISTA DE CONTENIDO (PDF/TEMAS) ---
+  // --- 2. VISTA DE CONTENIDO (PDF/TEMAS) ---
   const esExamenSiguiente = siguienteSeccion?.tipo === 'examen';
 
   return (
@@ -78,8 +59,9 @@ const MainContent = ({
 
         <section className={styles.viewerBlock}>
           <div className={styles.viewerFrame}>
+            {/* Agregamos #view=FitH para ajustar el ancho automáticamente */}
             <iframe 
-              src={`${activePage.url}#toolbar=0&navpanes=0`} 
+              src={`${activePage.url}#toolbar=0&navpanes=0&view=FitH`} 
               className={styles.pdfElement} 
               title="Visor de Contenido"
             />

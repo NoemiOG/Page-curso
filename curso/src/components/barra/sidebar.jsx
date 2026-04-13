@@ -2,10 +2,9 @@ import React from 'react';
 import { 
   Drawer, List, ListItem, ListItemButton, ListItemIcon, 
   ListItemText, IconButton, Box, Typography, Divider, Button, 
-  useMediaQuery, useTheme 
+  useMediaQuery, useTheme, Tooltip 
 } from '@mui/material';
 import { 
-  ChevronLeft as ChevronLeftIcon, 
   Book as BookIcon, 
   Description as FileIcon, 
   Lock as LockIcon,
@@ -16,11 +15,13 @@ import {
 const Sidebar = ({ cursoActual, activeId, onSelect, onShowProgress, open, setOpen, userAnswers = {} }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const drawerWidth = 280;
+  
+  // Definimos un ancho mucho más pequeño para que parezca una barra de herramientas
+  const drawerWidth = 80; 
 
   if (!cursoActual) return null;
 
-  // Lógica de estado y persistencia (Se mantienen igual)
+  // Lógica de validación de examen
   const calcularEstadoExamen = () => {
     const examen = cursoActual.secciones.find(s => s.tipo === 'examen');
     if (!examen) return { aprobado: false };
@@ -35,6 +36,7 @@ const Sidebar = ({ cursoActual, activeId, onSelect, onShowProgress, open, setOpe
 
   const { aprobado } = calcularEstadoExamen();
 
+  // Lógica de persistencia de lecciones
   const checkLeccionesCompletadas = () => {
     const guardado = localStorage.getItem(`completado_${cursoActual.id}`);
     const completadas = guardado ? JSON.parse(guardado) : [];
@@ -61,7 +63,6 @@ const Sidebar = ({ cursoActual, activeId, onSelect, onShowProgress, open, setOpe
       sx={{
         width: open ? drawerWidth : 0, 
         flexShrink: 0,
-        // ESTA PARTE ES CRÍTICA PARA EL POSICIONAMIENTO INTERNO
         '& .MuiDrawer-paper': {
           width: drawerWidth,
           boxSizing: 'border-box',
@@ -71,23 +72,27 @@ const Sidebar = ({ cursoActual, activeId, onSelect, onShowProgress, open, setOpe
           overflowX: 'hidden', 
           display: 'flex',
           flexDirection: 'column',
-          
-          /* Ajustes para que no invada Header ni Footer */
-          position: isMobile ? 'fixed' : 'relative', // En mobile sigue siendo fixed, en desktop es relativo
-          height: '100%', // Ocupa el 100% del Box central del App.jsx
-          zIndex: 1, // Por debajo del AppBar
+          alignItems: 'center', // Centramos los iconos
+          position: isMobile ? 'fixed' : 'relative',
+          height: '100%',
+          zIndex: 1,
+          transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
         },
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2 }}>
-        <Typography variant="h6" noWrap sx={{ fontWeight: 900, fontSize: '1.1rem' }}>
-          {cursoActual.titulo}
+      {/* Título del curso (Opcional, podrías quitarlo para más limpieza) */}
+      <Box sx={{ py: 2, textAlign: 'center' }}>
+        <Typography variant="caption" sx={{ fontWeight: 900, fontSize: '0.6rem', textTransform: 'uppercase' }}>
+          Curso
         </Typography>
       </Box>
       
-      <Divider />
+      <Divider sx={{ width: '80%' }} />
 
-      <List sx={{ flexGrow: 1, px: 1, mt: 1, overflowY: 'auto' }}>
+      <List sx={{ flexGrow: 1, px: 1, mt: 1, width: '100%' }}>
         {cursoActual.secciones.map((seccion) => {
           const esExamen = seccion.tipo === 'examen';
           if (esExamen && aprobado) return null;
@@ -95,44 +100,56 @@ const Sidebar = ({ cursoActual, activeId, onSelect, onShowProgress, open, setOpe
           const yaVista = leccionesVistas.includes(seccion.id);
 
           return (
-            <ListItem key={seccion.id} disablePadding sx={{ mb: 0.5 }}>
-              <ListItemButton 
-                disabled={bloqueado}
-                selected={activeId === seccion.id}
-                onClick={() => onSelect(seccion)}
-                sx={{ borderRadius: '8px' }}
-              >
-                <ListItemIcon sx={{ minWidth: 35 }}>
-                  {bloqueado ? <LockIcon fontSize="small" /> : 
-                   esExamen ? <FileIcon fontSize="small" /> : 
-                   yaVista ? <CheckIcon fontSize="small" color="success" /> : <BookIcon fontSize="small" />}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={seccion.label || seccion.tituloTema} 
-                  primaryTypographyProps={{ fontSize: '0.85rem' }}
-                />
-              </ListItemButton>
+            <ListItem key={seccion.id} disablePadding sx={{ mb: 1.5, justifyContent: 'center' }}>
+              <Tooltip title={seccion.label || seccion.tituloTema} placement="right" arrow>
+                <ListItemButton 
+                  disabled={bloqueado}
+                  selected={activeId === seccion.id}
+                  onClick={() => onSelect(seccion)}
+                  sx={{ 
+                    borderRadius: '12px', 
+                    justifyContent: 'center',
+                    minWidth: '50px',
+                    height: '50px',
+                    p: 0,
+                    '&.Mui-selected': {
+                      backgroundColor: 'primary.main',
+                      color: 'white',
+                      '&:hover': { backgroundColor: 'primary.dark' },
+                      '& .MuiListItemIcon-root': { color: 'white' }
+                    }
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 0, justifyContent: 'center' }}>
+                    {bloqueado ? <LockIcon fontSize="small" /> : 
+                     esExamen ? <FileIcon fontSize="small" /> : 
+                     yaVista ? <CheckIcon fontSize="small" color={activeId === seccion.id ? "inherit" : "success"} /> : 
+                     <BookIcon fontSize="small" />}
+                  </ListItemIcon>
+                </ListItemButton>
+              </Tooltip>
             </ListItem>
           );
         })}
       </List>
 
-      <Box sx={{ p: 2, borderTop: `1px solid ${theme.palette.divider}`, bgcolor: 'background.default' }}>
-        <Button
-          fullWidth
-          variant="contained"
-          startIcon={<ProgressIcon />}
-          onClick={onShowProgress}
-          sx={{
-            py: 1.5,
-            fontWeight: 800,
-            borderRadius: '10px',
-            bgcolor: aprobado ? '#2ecc71' : '#E11F26',
-            '&:hover': { bgcolor: aprobado ? '#27ae60' : '#b0181d' }
-          }}
-        >
-          {aprobado ? "Curso Completado" : "Mi Progreso"}
-        </Button>
+      {/* Botón de Progreso Flotante al final */}
+      <Box sx={{ p: 1.5, pb: 3 }}>
+        <Tooltip title={aprobado ? "Curso Completado" : "Mi Progreso"} placement="right" arrow>
+          <IconButton
+            onClick={onShowProgress}
+            sx={{
+              width: 50,
+              height: 50,
+              bgcolor: aprobado ? '#2ecc71' : '#E11F26',
+              color: 'white',
+              '&:hover': { bgcolor: aprobado ? '#27ae60' : '#b0181d' },
+              boxShadow: 3
+            }}
+          >
+            <ProgressIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
     </Drawer>
   );
