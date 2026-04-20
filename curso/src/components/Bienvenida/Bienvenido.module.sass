@@ -1,90 +1,143 @@
 .welcomeContainer
-  padding: 40px 20px
-  max-width: 1200px
-  margin: 0 auto
-  animation: fadeIn 0.6s ease-out
-  font-family: $font-main
+  padding: 3rem 2rem
+  background: var(--bg-app)
+  min-height: 100vh
 
-.hero
-  text-align: center
-  margin-bottom: 50px
-  
+.dashboardHeader
+  display: flex
+  justify-content: space-between
+  align-items: center
+  margin-bottom: 4rem
+  flex-wrap: wrap
+  gap: 2rem
+
   h1
-    font-size: 2.8rem
+    font-size: 2.2rem
+    font-weight: 800
+    margin-bottom: 0.5rem
     color: var(--text-main)
-    margin-bottom: 12px
-    font-weight: 700
-    font-family: $font-bold 
+
+.statsRow
+  display: flex
+  gap: 2rem
   
-  p
-    font-size: 1.2rem
-    color: var(--text-main)
-    opacity: 0.75
+  .statItem
+    background: var(--bg-card)
+    padding: 1rem 1.5rem
+    border-radius: 12px
+    display: flex
+    align-items: center
+    gap: 12px
+    border: 1px solid var(--border-color)
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05)
 
-.gridCursos
+    strong
+      display: block
+      font-size: 1.4rem
+      line-height: 1
+    span
+      font-size: 0.8rem
+      opacity: 0.6
+
+.statIcon
+  font-size: 2rem
+  color: #E11F26
+
+// Secciones
+.sectionGroup
+  margin-bottom: 4rem
+
+.groupTitle
+  font-size: 1.2rem
+  text-transform: uppercase
+  letter-spacing: 2px
+  margin-bottom: 2rem
+  color: var(--text-main)
+  opacity: 0.8
+  border-left: 4px solid #E11F26
+  padding-left: 15px
+
+.coursesGrid
   display: grid
-  // Grid responsivo: se ajusta solo según el tamaño de la pantalla
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr))
-  gap: 30px
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))
+  gap: 2rem
 
+// Tarjetas Detalladas
 .cursoCard
-  background-color: var(--bg-card)
+  background: var(--bg-card)
   border-radius: 20px
-  padding: 35px
-  text-align: center
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05)
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)
-  cursor: pointer
+  padding: 2rem
   border: 1px solid var(--border-color)
   display: flex
   flex-direction: column
-  justify-content: space-between
-  height: 100%
+  transition: all 0.3s ease
+  cursor: pointer
 
   &:hover
-    transform: translateY(-10px)
+    transform: translateY(-5px)
     box-shadow: 0 15px 35px rgba(0,0,0,0.1)
-    // Ajustado a $color-red para ser consistente
-    border-color: $color-red 
+    border-color: #E11F26
 
-  .iconContainer
-    background-color: var(--bg-app)
-    width: 90px
-    height: 90px
-    margin: 0 auto 25px
-    display: flex
-    align-items: center
-    justify-content: center
-    border-radius: 50%
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05)
-    border: 1px solid var(--border-color) // Añadido para que resalte en modo oscuro
+.cardTop
+  display: flex
+  justify-content: space-between
+  align-items: flex-start
+  margin-bottom: 1.5rem
 
-    .icon
-      font-size: 3rem
+.lessonBadge
+  background: rgba(225, 31, 38, 0.1)
+  color: #E11F26
+  font-size: 0.75rem
+  font-weight: 800
+  padding: 4px 12px
+  border-radius: 20px
 
+.iconBox
+  font-size: 2.5rem
+
+.cardBody
+  flex-grow: 1
   h3
     font-size: 1.4rem
-    color: var(--text-main)
-    margin-bottom: 12px
+    margin-bottom: 0.8rem
+  .description
+    font-size: 0.9rem
+    opacity: 0.7
+    line-height: 1.6
+    margin-bottom: 1.5rem
+
+.progressInfo
+  .barLabels
+    display: flex
+    justify-content: space-between
+    font-size: 0.8rem
     font-weight: 700
+    margin-bottom: 8px
+  
+  .fullBar
+    width: 100%
+    height: 8px
+    background: var(--border-color)
+    border-radius: 10px
+    margin-bottom: 8px
+    overflow: hidden
 
-  p
-    color: var(--text-main)
-    opacity: 0.6
-    font-size: 1rem
-    margin-bottom: 30px
-    flex-grow: 1
+    .fill
+      height: 100%
+      background: #E11F26
+      transition: width 1s ease
 
-.btnEntrar
-  @extend .btn-primary // Usa la herencia de tu variables.sass
+    .fillSuccess
+      background: #2ecc71
+
+  .counterText
+    font-size: 0.75rem
+    opacity: 0.5
+
+.btnAction
+  @extend .btn-primary // Tu botón rojo de Chakray
   width: 100%
-  font-size: 0.9rem
-  letter-spacing: 1px
-
-@keyframes fadeIn
-  from
-    opacity: 0
-    transform: translateY(20px)
-  to
-    opacity: 1
-    transform: translateY(0)
+  margin-top: 2rem
+  padding: 12px
+  font-size: 0.85rem
+  border-radius: 10px

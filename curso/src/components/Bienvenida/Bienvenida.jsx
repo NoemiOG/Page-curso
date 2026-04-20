@@ -1,61 +1,125 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import styles from './Bienvenido.module.sass';
+import { Book, CheckCircle, PendingActions, School } from '@mui/icons-material';
 
-/**
- * Componente funcional que renderiza la interfaz de bienvenida.
- * Presenta al usuario una galería de cursos disponibles para su selección.
- */
-const Bienvenido = ({ cursos = [], onSelectCurso }) => {
-  
-  /**
-   * Validación de integridad de datos.
-   * Si la colección de cursos se encuentra vacía o es inexistente, 
-   * el componente retorna un mensaje informativo de estado vacío.
-   */
-  if (!cursos || cursos.length === 0) {
-    return (
-      <div className={styles.welcomeContainer}>
-        <p>No hay cursos disponibles en este momento.</p>
+const Bienvenido = ({ cursos = [], onSelectCurso, mode, progresoUpdate, userAnswers = {} }) => { 
+
+  const cursosProcesados = useMemo(() => {
+    return cursos.map(curso => {
+      const key = `completado_${curso.id}`;
+      const completados = JSON.parse(localStorage.getItem(key) || "[]");
+      const lecciones = curso.secciones?.filter(s => s.tipo !== 'examen') || [];
+      const totalLecciones = lecciones.length;
+      const completadasCount = lecciones.filter(s => completados.includes(s.id)).length;
+      const porcentajeTeoria = totalLecciones > 0 ? Math.round((completadasCount / totalLecciones) * 100) : 0;
+
+      const examen = curso.secciones?.find(s => s.tipo === 'examen');
+      let aprobado = false;
+      if (examen) {
+        let aciertos = 0;
+        examen.preguntas.forEach(p => {
+          const resp = userAnswers[`${curso.id}_${p.id}`];
+          const correct = p.respuestaCorrecta;
+          if (p.esMultiple) {
+            if (Array.isArray(resp) && resp.length === correct.length && resp.every(v => correct.map(String).includes(String(v)))) aciertos++;
+          } else if (resp !== undefined && String(resp) === String(correct)) aciertos++;
+        });
+        aprobado = ((aciertos / examen.preguntas.length) * 100) >= 80;
+      }
+
+      return {
+        ...curso,
+        totalLecciones,
+        completadasCount,
+        progreso: porcentajeTeoria,
+        estado: aprobado ? "Completado" : (porcentajeTeoria > 0 ? "Pendiente" : "Sin iniciar")
+      };
+    });
+  }, [cursos, progresoUpdate, userAnswers]);
+
+  const stats = useMemo(() => ({
+    total: cursosProcesados.length,
+    completados: cursosProcesados.filter(c => c.estado === "Completado").length,
+    enCurso: cursosProcesados.filter(c => c.estado === "Pendiente").length
+  }), [cursosProcesados]);
+
+  const secciones = {
+    pendientes: cursosProcesados.filter(c => c.estado === "Pendiente"),
+    sinIniciar: cursosProcesados.filter(c => c.estado === "Sin iniciar"),
+    completados: cursosProcesados.filter(c => c.estado === "Completado")
+  };
+
+  const renderCard = (curso) => (
+    <article 
+      key={curso.id} 
+      className={`${styles.cursoCard} ${styles[`card${curso.estado.replace(" ", "")}`]}`}
+      onClick={() => onSelectCurso(curso)}
+    >
+      <div className={styles.cardTop}>
+        <span className={styles.lessonBadge}>{curso.totalLecciones} Lecciones</span>
+        <div className={styles.iconBox}>{curso.icono || '📖'}</div>
       </div>
-    );
-  }
+
+      <div className={styles.cardBody}>
+        <h3>{curso.titulo}</h3>
+        <p className={styles.description}>{curso.descripcion || "Capacitación"}</p>
+        
+        <div className={styles.progressInfo}>
+          <div className={styles.barLabels}>
+            <span>Progreso</span>
+            <span>{curso.progreso}%</span>
+          </div>
+          <div className={styles.fullBar}>
+            <div className={`${styles.fill} ${curso.estado === 'Completado' ? styles.fillSuccess : ''}`} style={{ width: `${curso.progreso}%` }} />
+          </div>
+          <span className={styles.counterText}>
+            {curso.completadasCount} de {curso.totalLecciones} completadas
+          </span>
+        </div>
+      </div>
+
+      <button className={styles.btnAction}>
+        {curso.estado === "Completado" ? 'REPASAR MÓDULO' : 'CONTINUAR APRENDIZAJE'}
+      </button>
+    </article>
+  );
 
   return (
     <div className={styles.welcomeContainer}>
-      {/* Sección de encabezado principal que orienta al usuario sobre la acción a realizar */}
-      <header className={styles.hero}>
-        <h1>Bienvenido</h1>
-        <p>Selecciona uno de tus cursos para continuar.</p>
+      {/* 1. Header con Resumen General */}
+      <header className={styles.dashboardHeader}>
+        <div className={styles.textHero}>
+          <h1>Panel de Aprendizaje</h1>
+          <p>Bienvenido de nuevo. Aquí tienes un resumen de tu actividad.</p>
+        </div>
+        
+        <div className={styles.statsRow}>
+          <div className={styles.statItem}>
+            <Book className={styles.statIcon} />
+            <div><strong>{stats.total}</strong> <span>Cursos Totales</span></div>
+          </div>
+          <div className={styles.statItem}>
+            <PendingActions className={styles.statIcon} style={{color: '#ff9800'}} />
+            <div><strong>{stats.enCurso}</strong> <span>En Proceso</span></div>
+          </div>
+          <div className={styles.statItem}>
+            <CheckCircle className={styles.statIcon} style={{color: '#2ecc71'}} />
+            <div><strong>{stats.completados}</strong> <span>Completados</span></div>
+          </div>
+        </div>
       </header>
 
-      {/* Contenedor principal de la cuadrícula de cursos */}
-      <div className={styles.gridCursos}>
-        {/* Realiza el mapeo de la colección para generar una tarjeta por cada elemento */}
-        {cursos.map((curso) => (
-          <article 
-            key={curso.id} // Clave única para la optimización del DOM virtual de React
-            className={styles.cursoCard} 
-            onClick={() => onSelectCurso(curso)} // Notifica al componente padre la selección del curso
-            
-            /* Atributos de accesibilidad para asegurar la compatibilidad con lectores de pantalla y navegación por teclado */
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && onSelectCurso(curso)}
-          >
-            {/* Representación visual del curso mediante un icono dinámico o predefinido */}
-            <div className={styles.iconContainer}>
-              <span className={styles.icon}>{curso.icono || '📖'}</span>
+      {/* 2. Secciones por Estado */}
+      <div className={styles.sectionsList}>
+        {Object.entries(secciones).map(([key, list]) => list.length > 0 && (
+          <section key={key} className={styles.sectionGroup}>
+            <h2 className={styles.groupTitle}>
+              {key === 'pendientes' ? 'Continuar' : key === 'completados' ? 'completados' : 'iniciar'}
+            </h2>
+            <div className={styles.coursesGrid}>
+              {list.map(renderCard)}
             </div>
-
-            {/* Información descriptiva del curso y su volumen de contenido */}
-            <h3>{curso.titulo}</h3>
-            
-            {/* Cálculo dinámico de la cantidad de lecciones basado en la estructura del objeto curso */}
-            <p>{curso.secciones?.length || 0} lecciones disponibles</p>
-            
-            {/* Elemento de acción visual que refuerza la interactividad de la tarjeta */}
-            <button className={styles.btnEntrar}>COMENZAR</button>
-          </article>
+          </section>
         ))}
       </div>
     </div>

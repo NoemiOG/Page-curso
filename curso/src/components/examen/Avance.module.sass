@@ -1,142 +1,202 @@
 // Avance.module.sass
-// Las variables ya están inyectadas automáticamente por Vite
-
 .progresoContainer
-  padding: 3rem 2rem
-  max-width: 1000px
+  padding: 4rem 2rem
+  max-width: 900px
   margin: 0 auto
-  animation: fadeIn 0.5s ease
-  font-family: $font-main
-  color: var(--text-main)
+  font-family: 'Roboto', sans-serif // Asegúrate de tener esta fuente o cambia a la tuya
 
-.headerTop
+.headerGlass
   text-align: center
-  margin-bottom: 3rem
-  
+  margin-bottom: 4rem
   .mainTitle
-    font-size: 2.5rem
-    font-family: $font-bold
+    font-size: 2.2rem
+    font-weight: 900
+    letter-spacing: -1px
+    margin-bottom: 0.5rem
     color: var(--text-main)
-    margin-bottom: 10px
-    text-transform: uppercase
-
+  .redDivider
+    width: 50px
+    height: 4px
+    background: #E11F26
+    margin: 1rem auto
   .subtitle
-    font-size: 1.1rem
-    opacity: 0.7
+    opacity: 0.6
 
-.cursosGrid
+.cursosList
   display: flex
   flex-direction: column
   gap: 2rem
 
-.cursoCardRevision
-  background-color: var(--bg-card)
-  border-radius: 15px
-  padding: 2rem
+.modernCard
+  .modernCard
+  background: var(--bg-card)
+  border-radius: 20px
+  padding: 2.5rem
   border: 1px solid var(--border-color)
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05)
-  overflow: hidden
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08)
+  transition: all 0.3s ease
 
-.headerRevision
+  // Ajuste para que en modo oscuro la sombra se note más
+  [data-theme='dark'] &
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5)
+
+.cardPass
+  border-left: 8px solid #2ecc71
+.cardFail
+  border-left: 8px solid #E11F26
+
+.cardHeader
   display: flex
   justify-content: space-between
   align-items: center
-  margin-bottom: 20px
 
-  h3
-    font-size: 1.5rem
-    margin: 0
-    font-family: $font-bold
+.moduleTag
+  font-size: 0.7rem
+  font-weight: 800
+  letter-spacing: 2px
+  color: #E11F26
+  display: block
+  margin-bottom: 0.5rem
 
-.porcentajeBox
-  font-size: 2.5rem
-  font-weight: 900
-  padding: 10px 20px
-  border-radius: 12px
-  font-family: $font-bold
+.infoSide h3
+  font-size: 1.6rem
+  margin: 0 0 1rem 0
 
-.bgPass
+.statusAprobado, .statusReprobado
+  display: flex
+  align-items: center
+  gap: 8px
+  font-weight: 800
+  font-size: 0.8rem
+
+.statusAprobado
   color: #2ecc71
-  background-color: rgba(46, 204, 113, 0.1)
+.statusReprobado
+  color: #E11F26
 
-.bgFail
-  color: $color-red
-  background-color: rgba(225, 31, 38, 0.1)
+// Gráfico Circular
+.chartWrapper
+  position: relative
+  width: 100px
+  height: 100px
 
-.badgePass, .badgeFail
-  display: inline-block
-  margin-top: 8px
-  font-weight: 700
-  text-transform: uppercase
-  font-size: 0.85rem
+.circularChart
+  width: 100%
+  height: 100%
 
-.badgePass
-  color: #2ecc71
+.circleBg
+  fill: none
+  stroke: var(--border-color)
+  stroke-width: 3
 
-.badgeFail
-  color: $color-red
+.circle
+  fill: none
+  stroke-width: 3
+  stroke-linecap: round
+  transition: stroke-dasharray 1s ease
+
+.circlePass
+  stroke: #2ecc71
+.circleFail
+  stroke: #E11F26
+
+.percentageCenter
+  position: absolute
+  top: 50%
+  left: 50%
+  transform: translate(-50%, -50%)
+  text-align: center
+  .number
+    font-size: 1.4rem
+    font-weight: 900
+    display: block
+    line-height: 1
+  .symbol
+    font-size: 0.7rem
+    opacity: 0.6
 
 .cardActions
+  margin-top: 2rem
+  padding-top: 1.5rem
+  border-top: 1px solid var(--border-color)
   display: flex
-  gap: 1rem
-  margin-top: 20px
+  justify-content: space-between
+  align-items: center
 
 .btnToggle
-  background: transparent
-  border: 2px solid var(--border-color)
+  background: none
+  border: none
   color: var(--text-main)
-  padding: 10px 20px
-  border-radius: 8px
-  cursor: pointer
-  font-weight: 600
-  transition: all 0.2s ease
-  &:hover
-    background-color: var(--border-color)
-
-.btnReset
-  @extend .btn-primary // Botón Rojo Chakray
-  padding: 10px 20px
-  font-size: 0.85rem
-
-// Acordeón de revisión
-.listaRevision
-  margin-top: 2rem
-  display: flex
-  flex-direction: column
-  gap: 15px
-  transition: all 0.4s ease-in-out
-  
-  &.hide
-    display: none
-  &.show
-    display: flex
-
-.itemCorrecto, .itemErroneo
-  padding: 15px 20px
-  border-radius: 10px
-  border-left: 5px solid transparent
-
-.itemCorrecto
-  background-color: rgba(46, 204, 113, 0.05)
-  border-left-color: #2ecc71
-
-.itemErroneo
-  background-color: rgba(225, 31, 38, 0.05)
-  border-left-color: $color-red
-
-.preguntaTexto
   font-weight: 700
-  margin-bottom: 5px
+  cursor: pointer
+  display: flex
+  align-items: center
+  gap: 5px
+  opacity: 0.6
+  &:hover
+    opacity: 1
+  .rotated
+    transform: rotate(180deg)
 
-.tuEleccion
-  font-size: 0.95rem
-  p
-    margin: 0
-  .mensajeError
-    color: $color-red
-    font-weight: 800
-    display: block
-    margin-top: 5px
+.btnReintentar
+  background: #E11F26
+  color: white
+  border: none
+  padding: 10px 20px
+  border-radius: 50px
+  font-weight: 700
+  display: flex
+  align-items: center
+  gap: 8px
+  cursor: pointer
+
+.successStamp
+  color: #2ecc71
+  font-weight: 900
+  font-size: 0.9rem
+
+// Revisión
+.revisionBody
+  margin-top: 2rem
+  background: var(--bg-app) 
+  opacity: 0.9
+  border-radius: 12px
+  padding: 1.5rem
+  border: 1px solid var(--border-color)
+
+.revisionItem
+  display: flex
+  gap: 15px
+  padding: 1rem 0
+  // Cambiamos el borde fijo por la variable de borde
+  border-bottom: 1px solid var(--border-color) 
+  &:last-child
+    border-bottom: none
+
+.linePass, .lineFail
+  width: 4px
+  border-radius: 2px
+.linePass
+  background: #2ecc71
+.lineFail
+  background: #E11F26
+
+.preguntaText
+  font-weight: 700
+  margin: 0 0 5px 0
+  color: var(--text-main)
+
+.respuestaText
+  font-size: 0.9rem
+  color: var(--text-main) // El texto base de la respuesta
+  opacity: 0.8
+  .correct
+    color: #2ecc71
+    font-weight: 700
+  .wrong
+    color: #E11F26
+    font-weight: 700
+    
 
 .footerAvance
   margin-top: 4rem
@@ -144,13 +204,13 @@
   justify-content: center
 
 .btnHome
-  @extend .btn-secondary // Botón Gris Steel/Gunmetal
+  background: #333
+  color: white
+  border: none
   padding: 15px 40px
-
-@keyframes fadeIn
-  from
-    opacity: 0
-    transform: translateY(10px)
-  to
-    opacity: 1
-    transform: translateY(0)
+  border-radius: 12px
+  font-weight: 700
+  display: flex
+  align-items: center
+  gap: 10px
+  cursor: pointer

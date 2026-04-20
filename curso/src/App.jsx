@@ -1,12 +1,14 @@
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'; 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { StyledEngineProvider, createTheme, ThemeProvider } from '@mui/material/styles';
 import { 
-  useMediaQuery, useTheme, AppBar, Toolbar, Box, Button, IconButton, CssBaseline, Tooltip 
+  useMediaQuery, AppBar, Toolbar, Box, IconButton, CssBaseline,
+  Menu, MenuItem, Divider, Typography 
 } from '@mui/material';
 import {
-  Menu as MenuIcon, Brightness4 as Brightness4Icon, Brightness7 as Brightness7Icon,
-  AccountCircle as ProfileIcon, Home as HomeIcon, Logout as LogoutIcon
+  Menu as MenuIcon,
+  AccountCircle as ProfileIcon,
+  KeyboardArrowDown as ArrowDownIcon 
 } from '@mui/icons-material';
 
 // Componentes
@@ -17,33 +19,55 @@ import Welcome from './components/Bienvenida/Bienvenida';
 import Avance from './components/examen/Avance'; 
 import Perfil from './components/Perfil/Perfil';
 
-// Estilos y Assets
-import styles from './components/App.module.sass';
+// Data y Assets
 import dataCursos from './components/data/cursos.json';
 import logoChakray from './assets/chakraylogo.png'; 
 import logoChakraydark from './assets/logo.png'; 
+
+// 1. Base de Datos de Usuarios Autorizados (Actualizada)
+const USUARIOS_AUTORIZADOS = [
+  { nombre: "Ingeniño", email: "ingeniero@chakray.com" },
+  { nombre: "El Inge", email: "elinge@chakray.com" },
+  { nombre: "Admin", email: "admin@chakray.com" }
+];
 
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  const [mode, setMode] = useState('light'); 
+  // --- ESTADOS DE SESIÓN Y TEMA ---
+  const [mode, setMode] = useState(localStorage.getItem('theme') || 'light'); 
   const [isLogged, setIsLogged] = useState(false);
+  const [userData, setUserData] = useState(null);
+
+  // --- ESTADOS DE CONTENIDO CON PERSISTENCIA ---
+  const [userAnswers, setUserAnswers] = useState(() => {
+    const saved = localStorage.getItem('user_answers_backup');
+    return saved ? JSON.parse(saved) : {};
+  }); 
+  
   const [courseSelected, setCourseSelected] = useState(null); 
   const [currentPage, setCurrentPage] = useState(null);       
-  const [userAnswers, setUserAnswers] = useState({}); 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [progresoUpdate, setProgresoUpdate] = useState(Date.now());
+  const [examenEnCurso, setExamenEnCurso] = useState(false);
+  const [filtroAvance, setFiltroAvance] = useState(null);
 
+  const openMenu = Boolean(anchorEl);
   const isMobile = useMediaQuery('(max-width:900px)');
 
-  const [userData, setUserData] = useState({
-    nombre: "Ingeniño 1",
-    email: "ingeniero@chakray.mx"
-  });
+  // 2. Efecto para Tema y Persistencia de Respuestas
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', mode);
+    localStorage.setItem('theme', mode);
+  }, [mode]);
 
-  // LÓGICA DE VISIBILIDAD DE SIDEBAR: Solo se activa en la ruta del curso
-  const shouldShowSidebar = courseSelected && location.pathname === '/curso-detalle';
+  useEffect(() => {
+    localStorage.setItem('user_answers_backup', JSON.stringify(userAnswers));
+  }, [userAnswers]);
 
+  // 3. Configuración de MUI (Ajuste de botones y colores)
   const theme = useMemo(() => createTheme({
     palette: {
       mode: mode,
@@ -52,67 +76,124 @@ function App() {
         default: mode === 'dark' ? '#111111' : '#FFFFFF',
         paper: mode === 'dark' ? '#49494A' : '#EDEDED',
       },
-      text: { 
-        primary: mode === 'dark' ? '#FFFFFF' : '#111111',
-        secondary: '#878787',
-      },
-      divider: mode === 'dark' ? '#49494A' : '#CCCCCC',
     },
-    typography: { fontFamily: '"Roboto", sans-serif' },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: '8px', // Bordes sólidos, no ovalados
+            textTransform: 'uppercase',
+            fontWeight: 700,
+          },
+        },
+      },
+    },
   }), [mode]);
 
   const currentLogo = mode === 'dark' ? logoChakraydark : logoChakray;
 
-  // --- HANDLERS ---
+  // --- MANEJADORES DE FLUJO ---
 
-  const handleGoHome = () => {
-    setCourseSelected(null);
-    setCurrentPage(null);
-    navigate('/inicio'); 
-    if (isMobile) setSidebarOpen(false);
-  };
+  const handleLogin = (emailIngresado) => {
+    const usuario = USUARIOS_AUTORIZADOS.find(
+      u => u.email.toLowerCase() === emailIngresado.toLowerCase()
+    );
 
-  const handleSaveAnswers = (respuestasDelExamen) => {
-    setUserAnswers(prev => ({ ...prev, ...respuestasDelExamen }));
-    navigate('/avance'); 
-  };
-
-  const handleResetExamen = (cursoId) => {
-    setUserAnswers(prev => {
-      const nuevasRespuestas = { ...prev };
-      Object.keys(nuevasRespuestas).forEach(key => {
-        if (key.startsWith(`${cursoId}_`)) delete nuevasRespuestas[key];
-      });
-      return nuevasRespuestas;
-    });
-    navigate('/inicio'); 
+    if (usuario) {
+      setUserData(usuario);
+      setIsLogged(true);
+      // Siempre mandamos a inicio al loguear
+      navigate('/inicio');
+    } else {
+      alert("Acceso denegado: El correo no pertenece a la red de Chakray.");
+    }
   };
 
   const handleLogout = () => {
     setIsLogged(false);
+    setUserData(null);
+    setCourseSelected(null);
+    setCurrentPage(null);
+    setAnchorEl(null);
+    // Al cerrar sesión, forzamos el regreso a la raíz
     navigate('/'); 
   };
 
-  const handleToggleTheme = () => {
-    const newMode = mode === 'dark' ? 'light' : 'dark';
-    setMode(newMode);
-    document.documentElement.setAttribute('data-theme', newMode);
+  const handleLessonComplete = (seccionId) => {
+    if (!courseSelected) return;
+    const key = `completado_${courseSelected.id}`;
+    const completados = JSON.parse(localStorage.getItem(key) || "[]");
+    if (!completados.includes(seccionId)) {
+      localStorage.setItem(key, JSON.stringify([...completados, seccionId]));
+      setProgresoUpdate(Date.now());
+    }
   };
 
-  if (!isLogged) return <Login onLogin={() => setIsLogged(true)} mode={mode} />;
+  const handleResetExamen = (cursoId) => {
+    localStorage.removeItem(`intentos_${cursoId}`);
+    setUserAnswers(prev => {
+      const nuevas = { ...prev };
+      Object.keys(nuevas).forEach(key => {
+        if (key.startsWith(`${cursoId}_`)) delete nuevas[key];
+      });
+      return nuevas;
+    });
+    const curso = dataCursos.find(c => c.id === cursoId);
+    const examenSeccion = curso?.secciones.find(s => s.tipo === 'examen');
+    if (curso && examenSeccion) {
+      setCourseSelected(curso);
+      setCurrentPage(examenSeccion);
+      setExamenEnCurso(false);
+      setFiltroAvance(null);
+      navigate('/curso-detalle');
+    }
+  };
+
+  // --- NAVEGACIÓN ---
+
+  const handleOpenUserMenu = (event) => !examenEnCurso && setAnchorEl(event.currentTarget);
+  const handleCloseUserMenu = () => setAnchorEl(null);
+
+  const handleGoHome = () => {
+    if (examenEnCurso) return;
+    handleCloseUserMenu();
+    setCourseSelected(null);
+    setCurrentPage(null);
+    setFiltroAvance(null);
+    navigate('/inicio'); 
+  };
+
+  const handleVerAvanceGeneral = () => {
+    setFiltroAvance(null);
+    handleCloseUserMenu();
+    navigate('/avance');
+  };
+
+  const esExamen = currentPage?.tipo === 'examen';
+  const esRutaCurso = location.pathname === '/curso-detalle';
+  const shouldShowSidebar = courseSelected && esRutaCurso && !esExamen && !examenEnCurso;
+
+  if (!isLogged) return <Login onLogin={handleLogin} mode={mode} />;
 
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: 'background.default' }}>
           
-          <AppBar position="static" sx={{ 
-            backgroundImage: 'none', boxShadow: 'none', bgcolor: 'background.default',
-            borderBottom: `1px solid ${theme.palette.divider}`, color: 'text.primary', zIndex: 1201
-          }}>
-            <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 1, sm: 2 } }}>
+          <AppBar 
+            position="static" 
+            sx={{ 
+              bgcolor: 'background.default', 
+              color: 'text.primary', 
+              boxShadow: 'none', 
+              borderBottom: 1, 
+              borderColor: 'divider',
+              pointerEvents: examenEnCurso ? 'none' : 'auto',
+              opacity: examenEnCurso ? 0.6 : 1
+            }}
+          >
+            <Toolbar sx={{ justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 {shouldShowSidebar && (
                   <IconButton onClick={() => setSidebarOpen(!sidebarOpen)} color="inherit">
@@ -122,109 +203,99 @@ function App() {
                 <img 
                   src={currentLogo} 
                   alt="Logo" 
-                  style={{ height: isMobile ? '28px' : '35px', cursor: 'pointer' }} 
+                  style={{ height: '35px', cursor: examenEnCurso ? 'default' : 'pointer' }} 
                   onClick={handleGoHome} 
                 />
               </Box>
 
-              <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 } }}>
-                <Tooltip title="Cambiar Tema">
-                  <IconButton onClick={handleToggleTheme} color="inherit">
-                    {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip title="Inicio">
-                  {isMobile ? (
-                    <IconButton color="inherit" onClick={() => navigate('/inicio')}>
-                      <HomeIcon />
-                    </IconButton>
-                  ) : (
-                    <Button startIcon={<HomeIcon />} color="inherit" onClick={() => navigate('/inicio')}>Inicio</Button>
-                  )}
-                </Tooltip>
-
-                <Tooltip title="Mi Perfil">
-                  {isMobile ? (
-                    <IconButton color="inherit" onClick={() => navigate('/perfil')}>
-                      <ProfileIcon />
-                    </IconButton>
-                  ) : (
-                    <Button startIcon={<ProfileIcon />} color="inherit" onClick={() => navigate('/perfil')}>Perfil</Button>
-                  )}
-                </Tooltip>
-
-                <Tooltip title="Cerrar Sesión">
-                  <IconButton onClick={handleLogout} color="error">
-                    <LogoutIcon />
-                  </IconButton>
-                </Tooltip>
+              <Box>
+                <IconButton onClick={handleOpenUserMenu} color="inherit" sx={{ gap: 1 }}>
+                  <ProfileIcon />
+                  {!isMobile && <Typography variant="body2" sx={{ fontWeight: 700 }}>{userData?.nombre}</Typography>}
+                  {!examenEnCurso && <ArrowDownIcon fontSize="small" />}
+                </IconButton>
+                <Menu anchorEl={anchorEl} open={openMenu} onClose={handleCloseUserMenu}>
+                  <MenuItem onClick={handleGoHome}>Inicio</MenuItem>
+                  <MenuItem onClick={() => { navigate('/perfil'); handleCloseUserMenu(); }}>Perfil</MenuItem>
+                  <MenuItem onClick={handleVerAvanceGeneral}>Resumen General</MenuItem>
+                  <MenuItem onClick={() => { setMode(mode === 'dark' ? 'light' : 'dark'); handleCloseUserMenu(); }}>
+                    Modo {mode === 'dark' ? 'Claro' : 'Oscuro'}
+                  </MenuItem>
+                  <Divider />
+                  <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>Cerrar Sesión</MenuItem>
+                </Menu>
               </Box>
             </Toolbar>
           </AppBar>
 
-          <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden', position: 'relative' }}>
-            
+          <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
             {shouldShowSidebar && (
               <Sidebar 
                 cursoActual={courseSelected} 
                 activeId={currentPage?.id} 
                 onSelect={setCurrentPage} 
-                onShowProgress={() => navigate('/avance')}
                 open={sidebarOpen} 
                 setOpen={setSidebarOpen} 
-                userAnswers={userAnswers} 
+                progresoUpdate={progresoUpdate}
+                userAnswers={userAnswers}
+                onShowProgress={handleVerAvanceGeneral}
               />
             )}
             
-            <Box component="main" sx={{ flexGrow: 1, overflowY: 'auto', bgcolor: 'background.default', display: 'flex', flexDirection: 'column' }}>
-              <Box sx={{ flexGrow: 1, width: '100%' }}>
-                <Routes>
-                  <Route path="/" element={<Navigate to="/inicio" />} />
-                  
-                  <Route path="/inicio" element={
-                    <Welcome 
+            <Box component="main" sx={{ flexGrow: 1, overflowY: 'auto', bgcolor: 'background.default' }}>
+              <Routes>
+                <Route path="/inicio" element={
+                  <Welcome 
+                    cursos={dataCursos} 
+                    userAnswers={userAnswers}
+                    onSelectCurso={(c) => { 
+                      setCourseSelected(c); 
+                      setCurrentPage(c.secciones[0]); 
+                      navigate('/curso-detalle'); 
+                    }} 
+                  />
+                } />
+
+                <Route path="/perfil" element={
+                  <Perfil 
+                    usuario={userData} 
+                    cursos={dataCursos} 
+                    userAnswers={userAnswers} 
+                    onBack={handleGoHome} 
+                  />
+                } />
+
+                <Route path="/avance" element={
+                  <Avance 
+                    cursos={dataCursos} 
+                    userAnswers={userAnswers} 
+                    onResetExamen={handleResetExamen}
+                    onContinuar={handleGoHome}
+                    cursoIdFiltrado={filtroAvance}
+                  />
+                } />
+
+                <Route path="/curso-detalle" element={
+                  courseSelected ? (
+                    <MainContent 
+                      activePage={currentPage} 
+                      onSelect={setCurrentPage} 
                       cursos={dataCursos} 
-                      onSelectCurso={(c) => { 
-                        setCourseSelected(c); 
-                        setCurrentPage(c.secciones[0]); 
-                        navigate('/curso-detalle'); 
+                      userAnswers={userAnswers}
+                      onLessonComplete={handleLessonComplete} 
+                      onExamStatusChange={(status) => setExamenEnCurso(status)}
+                      onSaveAnswers={(ans) => { 
+                        setUserAnswers(prev => ({...prev, ...ans})); 
+                        setExamenEnCurso(false);
+                        setFiltroAvance(courseSelected.id);
+                        navigate('/avance'); 
                       }} 
                     />
-                  } />
+                  ) : <Navigate to="/inicio" />
+                } />
 
-                  <Route path="/perfil" element={
-                    <Perfil usuario={userData} cursos={dataCursos} userAnswers={userAnswers} onBack={handleGoHome} />
-                  } />
-
-                  <Route path="/avance" element={
-                    <Avance 
-                       cursos={dataCursos} 
-                       userAnswers={userAnswers} 
-                       onContinuar={handleGoHome} 
-                       onResetExamen={handleResetExamen} 
-                       cursoIdFiltrado={courseSelected?.id} 
-                    />
-                  } />
-
-                  <Route path="/curso-detalle" element={
-                    courseSelected ? (
-                      <MainContent 
-                        activePage={currentPage} 
-                        cursos={dataCursos} 
-                        onSelect={setCurrentPage}
-                        userAnswers={userAnswers}
-                        onSaveAnswers={handleSaveAnswers}
-                        onResetExamen={handleResetExamen}
-                      />
-                    ) : <Navigate to="/inicio" />
-                  } />
-                </Routes>
-              </Box>
-
-              <footer className={styles.footer} style={{ width: '100%', marginTop: 'auto' }}>
-                <p>© 2026 Chakray</p>
-              </footer>
+                <Route path="*" element={<Navigate to="/inicio" />} />
+              </Routes>
             </Box>
           </Box>
         </Box>

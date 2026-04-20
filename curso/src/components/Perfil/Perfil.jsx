@@ -68,12 +68,10 @@ const Perfil = ({ usuario, onBack, cursos = [], userAnswers = {} }) => {
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <span className={styles.statLabel}>Exámenes Realizados</span>
-          {/* Ahora usamos el valor calculado 'total' en lugar de stats.totalIniciados */}
           <p className={styles.statValue}>{total}</p>
         </div>
         <div className={styles.statCard}>
           <span className={styles.statLabel}>Promedio General</span>
-          {/* Ahora usamos el valor calculado 'promedio' */}
           <p className={styles.statValue}>{promedio}%</p>
         </div>
       </div>

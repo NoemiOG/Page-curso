@@ -1,18 +1,13 @@
 import { useState } from 'react';
 import styles from './login.module.sass';
-// Importamos ambos logos
 import logoChakrayLight from '../../assets/chakraylogo.png'; 
 import logoChakrayDark from '../../assets/logo.png'; 
 
-/**
- * Componente Login actualizado para soportar cambio de logo dinámico.
- */
-const Login = ({ onLogin, mode }) => { // Recibe 'mode' como prop
+const Login = ({ onLogin, mode }) => {
   const [email, setEmail] = useState('');
   const [isValid, setIsValid] = useState(true);
 
-  // Selección dinámica del logo según el modo
-  const currentLogo = mode === 'dark' ? logoChakrayDark : logoChakrayLight;
+const currentLogo = mode === 'dark' ? logoChakrayDark : logoChakrayLight;
 
   const validarEmail = (e) => {
     const valor = e.target.value;
@@ -23,16 +18,14 @@ const Login = ({ onLogin, mode }) => { // Recibe 'mode' como prop
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (isValid && email !== '') {
-      onLogin(email);
-    }
+    if (isValid && email !== '') onLogin(email);
   };
 
   return (
-    <div className={styles.container}>
+    /* Agregamos data-theme aquí para que el fondo cambie a oscuro si mode es dark */
+    <div className={styles.container} data-theme={mode}>
       <div className={styles.card}>
         <div className={styles.header}>
-          {/* Usamos currentLogo en lugar del logo estático */}
           <img src={currentLogo} alt="Chakray Logo" className={styles.logo} />
         </div>
 
@@ -48,12 +41,8 @@ const Login = ({ onLogin, mode }) => { // Recibe 'mode' como prop
               required 
             />
           </div>
-          
           {!isValid && <p className={styles.errorText}>Email no válido</p>}
-
-          <button type="submit" className={styles.btnAcceder}>
-            INGRESAR
-          </button>
+          <button type="submit" className={styles.btnAcceder}>INGRESAR</button>
         </form>
       </div>
     </div>
