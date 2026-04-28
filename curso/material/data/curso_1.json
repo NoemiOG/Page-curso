@@ -1,0 +1,74 @@
+
+  {
+    "id": 1,
+    "titulo": "CURSO 1",
+    "secciones": [
+      {
+        "id": "1a",
+        "tipo": "presentacion",
+        "label": "PRESENTACIÓN",
+        "tituloTema": "CONECTANDO ANDO",
+        "url": "/presentaciones/presentacionChakray.pdf#zoom=125&navpanes=0&toolbar=0",
+        "textoLargo": "AQUI PROBANDO SI SE ACTUALIZA EL CURSO CON LOS VOLUMENES Y LOS CAMBIOS, SISISISI"
+      },
+      {
+        "id": "1b",
+        "tipo": "presentacion_externa", 
+        "label": "TEMA 2",
+        "tituloTema": "AQUI VA UN TEMA BIEN PADRE",
+        "url": "/presentaciones/presentación.pdf#zoom=125&navpanes=0&toolbar=0",
+        "textoLargo": "una introducción divis, divis"
+      },
+      {
+        "id": "1c",
+        "tipo": "presentacion_externa",
+        "label": "CONTENIDO",
+        "tituloTema": "AQUI VA OTRO TEMA MAS PADRE",
+        "url": "/presentaciones/chakray.pdf#zoom=100&navpanes=0&toolbar=0",
+        "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
+      },
+      {
+        "id": "1d",
+        "tipo": "tema2",
+        "label": "CONTENIDO1",
+        "tituloTema": "Porque uno no es ninguno, mas temas padres",
+        "url": "/presentaciones/presentacionChakray.pdf#zoom=125&navpanes=0&toolbar=0",
+        "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
+      },
+      {
+        "id": "1e",
+        "tipo": "examen",
+        "label": "EXAMEN",
+        "tituloTema": "EXAMEN",
+        "instrucciones": "Instrucciones del examen. Tiempo, evaluación, no comer, no distracciones. Si repruebas mejor ya ni vengas, buscate otra chamba.",
+        "preguntas": [
+          {
+            "id": "q1",
+            "texto": "Cuando da clases Shrek",
+            "opciones": ["No da clases", "Los jueves", "Quien es Shrek", "Los lunes"],
+            "respuestaCorrecta": 1
+          },
+          {
+            "id": "q2",
+            "texto": "Quien trabaja menos en la oficina",
+            "opciones": ["Andoni paseandose", "Randhy en el celular", "Todos trabajan por igual porque somos bien chambeadores, como de que no", "Ambos" ],
+            "respuestaCorrecta": 2
+          },
+          {
+            "id": "q3",
+            "texto": "Cuanta agua se le pone al arroz",
+            "opciones": ["Dos tazas por una de arroz", "Mejor como en la calle", "Hasta que truene", "Arroz con leche?"],
+            "respuestaCorrecta": 0
+          },
+          {
+            "id": "q4",
+            "texto": "¿Cuál es la capital de México?",
+            "opciones": ["Guadalajara", "Narnia", "CDMX", "Puebla" ],
+            "respuestaCorrecta": 2
+          }
+          
+    ]
+      }
+    ]
+  }
+ 

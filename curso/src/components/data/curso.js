@@ -39,20 +39,29 @@ function ProgressPage({ userAnswers, cursos }) {
       const respuestaUsuario = userAnswers[pregunta.id];
       const respuestaCorrecta = pregunta.respuesta !== undefined ? pregunta.respuesta : pregunta.respuestaCorrecta;
 
-      if (respuestaUsuario === respuestaCorrecta) {
+      if (pregunta.esMultiple) {
+      // Comparación para arreglos (esMultiple)
+      if (Array.isArray(respUsuario) && 
+          respUsuario.length === respCorrecta.length && 
+          respUsuario.every(val => respCorrecta.includes(val))) {
         aciertos++;
       }
-    });
+    } else {
+      // Comparación normal
+      if (respUsuario === respCorrecta) {
+        aciertos++;
+      }
+    }
+  });
 
     const porcentaje = (aciertos / totalPreguntas) * 100;
-    
-    return {
-      aciertos,
-      total: totalPreguntas,
-      aprobado: porcentaje >= 70, 
-      porcentaje
-    };
+  return {
+    aciertos,
+    total: totalPreguntas,
+    aprobado: porcentaje >= 70,
+    porcentaje: porcentaje.toFixed(0)
   };
+};
 
   return (
     <div className={styles.progressContainer}>

@@ -1,5 +1,3 @@
-// MainContent.module.sass
-
 .mainContainer
   flex: 1
   overflow-y: auto
@@ -14,14 +12,18 @@
     border-radius: 10px
 
 .contentWrapper
-  // Aumentamos el ancho máximo para Web
-  max-width: 1400px // <--- Agrandamos el contenedor de 1000px a 1400px
+  max-width: 1400px 
   margin: 0 auto
   padding: 40px 20px 80px
+  
+  @media (max-width: 600px)
+    padding: 20px 10px 40px 
 
 .mainHeader
   margin-bottom: 30px
   animation: fadeIn 0.5s ease
+  @media (max-width: 600px)
+    margin-bottom: 15px
   
   .categoryTag
     color: $color-red
@@ -35,6 +37,8 @@
     color: var(--text-main)
     font-family: $font-bold
     margin-top: 10px
+    @media (max-width: 600px)
+      font-size: 1.6rem 
 
 .viewerBlock
   background-color: var(--bg-card)
@@ -43,47 +47,64 @@
   border: 1px solid var(--border-color)
   box-shadow: 0 10px 30px rgba(0,0,0,0.1)
   margin-bottom: 40px
-
-@media (max-width: 600px)
-  .contentWrapper
-    padding: 20px 10px 40px // Menos espacio en las orillas para el celular
+  
+  @media (max-width: 600px)
+    padding: 10px 
+    margin-bottom: 20px
 
 .viewerFrame
   width: 100%
-  // Reducimos un poco para que los botones de navegación sean visibles siempre
   height: 70vh 
   background-color: $color-midnight
-  border-radius: 12px // Un poco más redondeado para suavizar
-  overflow: hidden
+  border-radius: 12px
+  overflow: hidden 
   margin-bottom: 20px
   border: 1px solid var(--border-color)
-  // Añadimos una sombra interna para dar profundidad
   box-shadow: inset 0 2px 10px rgba(0,0,0,0.2)
+  position: relative
+  
+  // LOGICA RESPONSIVA:
+  height: 70vh 
+  position: relative 
+
+  @media (max-width: 600px)
+    height: auto 
+    padding-top: 70%
+    border-radius: 8px
 
 .pdfElement
+  @media (max-width: 600px)
+    position: absolute
+    top: 0
+    left: 0
   width: 100%
   height: 100%
   border: none
+  display: block
+  position: absolute 
+  top: 0
+  left: 0
 
 .navigationRow
   display: flex
   justify-content: space-between
   gap: 20px
+  @media (max-width: 600px)
+    gap: 10px
 
 .btnRegresar
   @extend .btn-secondary
   flex: 1
   max-width: 200px
+  @media (max-width: 600px)
+    font-size: 0.8rem 
 
-.btnSiguiente
+.btnSiguiente, .btnExamen
   @extend .btn-primary
   flex: 2
   max-width: 300px
-
-.btnExamen
-  @extend .btn-primary
-  flex: 2
-  max-width: 300px
+  @media (max-width: 600px)
+    font-size: 0.8rem
 
 
 .infoSection
@@ -113,8 +134,6 @@
   height: 100%
   overflow-y: auto
   animation: fadeIn 0.4s ease
-
-// Al final de tu archivo MainContent.module.sass
 
 @keyframes fadeIn
   from

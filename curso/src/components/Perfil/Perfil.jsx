@@ -4,30 +4,19 @@ import styles from './Perfil.module.sass';
 const Perfil = ({ usuario, onBack, cursos = [], userAnswers = {} }) => {
   
   const inicial = usuario?.nombre?.charAt(0) || "U";
+  const userEmail = usuario?.email;
 
-  // --- NUEVA LÓGICA DE CÁLCULO EN TIEMPO REAL ---
+  // --- LÓGICA DE MÉTRICAS USANDO EL ESTADO GLOBAL ---
   const calcularMetricasGlobales = () => {
     let totalIntentados = 0;
     let sumaPorcentajes = 0;
 
     cursos.forEach(curso => {
-      const examen = curso.secciones?.find(s => s.tipo === 'examen');
-      if (!examen) return;
-
-      let aciertos = 0;
-      let tieneRespuestas = false;
-
-      examen.preguntas.forEach(p => {
-        const respUser = userAnswers[`${curso.id}_${p.id}`];
-        if (respUser !== undefined) {
-          tieneRespuestas = true;
-          if (respUser == p.respuestaCorrecta) aciertos++;
-        }
-      });
-
-      if (tieneRespuestas) {
+      const puntaje = userAnswers[`puntaje_${curso.id}_${userEmail}`];
+      
+      if (puntaje !== undefined) {
         totalIntentados++;
-        sumaPorcentajes += (aciertos / examen.preguntas.length) * 100;
+        sumaPorcentajes += puntaje;
       }
     });
 
@@ -40,17 +29,10 @@ const Perfil = ({ usuario, onBack, cursos = [], userAnswers = {} }) => {
   const { total, promedio } = calcularMetricasGlobales();
 
   const verificarEstadoCurso = (curso) => {
-    const examen = curso.secciones?.find(s => s.tipo === 'examen');
-    if (!examen) return "Sin examen";
-
-    let aciertos = 0;
-    examen.preguntas.forEach(p => {
-      const respUser = userAnswers[`${curso.id}_${p.id}`];
-      if (respUser == p.respuestaCorrecta) aciertos++;
-    });
-
-    const porcentaje = (aciertos / examen.preguntas.length) * 100;
-    return porcentaje >= 80 ? "Completado ✓" : "Pendiente ✗";
+    const puntaje = userAnswers[`puntaje_${curso.id}_${userEmail}`];
+    
+    if (puntaje === undefined) return "Pendiente ✗";
+    return puntaje >= 80 ? "Completado ✓" : "No  ✗";
   };
 
   return (
@@ -60,7 +42,8 @@ const Perfil = ({ usuario, onBack, cursos = [], userAnswers = {} }) => {
           {usuario?.avatar ? <img src={usuario.avatar} alt="Avatar" /> : inicial}
         </div>
         <div className={styles.info}>
-          <h2>{usuario?.nombre || "Estudiante"}</h2>
+          {/* El nombre del usuario actual */}
+          <h2>{usuario?.nombre || "Empleado"}</h2>
           <p>{usuario?.email || "Sin correo registrado"}</p>
         </div>
       </header>
@@ -79,19 +62,27 @@ const Perfil = ({ usuario, onBack, cursos = [], userAnswers = {} }) => {
       <section className={styles.cursosListSection}>
         <h3 className={styles.sectionTitle}>Estado de tus Módulos</h3>
         <div className={styles.listaCursosPerfil}>
-          {cursos.map(curso => {
-            const estado = verificarEstadoCurso(curso);
-            const esCompletado = estado === "Completado ✓";
+          {cursos.length === 0 ? (
+            <p style={{ textAlign: 'center', opacity: 0.6 }}>No hay cursos cargados.</p>
+          ) : (
+            cursos.map(curso => {
+              const estado = verificarEstadoCurso(curso);
+              const puntaje = userAnswers[`puntaje_${curso.id}_${userEmail}`] || 0;
+              const esCompletado = estado === "Completado ✓";
 
-            return (
-              <div key={curso.id} className={styles.cursoFila}>
-                <span className={styles.nombreCurso}>{curso.titulo}</span>
-                <span className={esCompletado ? styles.badgeCompletado : styles.badgePendiente}>
-                  {estado}
-                </span>
-              </div>
-            );
-          })}
+              return (
+                <div key={curso.id} className={styles.cursoFila}>
+                  <div className={styles.infoFila}>
+                    <span className={styles.nombreCurso}>{curso.titulo}</span>
+                    <span className={styles.puntajeFila}>({puntaje}%)</span>
+                  </div>
+                  <span className={esCompletado ? styles.badgeCompletado : styles.badgePendiente}>
+                    {estado}
+                  </span>
+                </div>
+              );
+            })
+          )}
         </div>
       </section>
 

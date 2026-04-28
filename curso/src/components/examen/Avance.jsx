@@ -1,160 +1,184 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import styles from './Avance.module.sass';
 
-// Importaciones directas (las más estables en Vite)
+// Material UI Icons
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import ReplayIcon from '@mui/icons-material/Replay';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import LockIcon from '@mui/icons-material/Lock';
 
-const Avance = ({ cursos, userAnswers, onContinuar, onResetExamen, cursoIdFiltrado = null }) => {
-  const [cursoAbierto, setCursoAbierto] = useState(null);
+const Avance = ({ 
+  cursos = [], 
+  userAnswers = {}, 
+  onContinuar, 
+  onResetExamen, 
+  cursoIdFiltrado = null, 
+  userEmail 
+}) => {
+  const [cursoAbierto, setCursoAbierto] = useState(cursoIdFiltrado || null);
 
-  // Filtrado de cursos
+  useEffect(() => {
+    if (cursoIdFiltrado) setCursoAbierto(cursoIdFiltrado);
+  }, [cursoIdFiltrado]);
+
   const cursosAVisualizar = useMemo(() => {
+    if (!cursos || cursos.length === 0) return [];
+
+    const savedAnswers = JSON.parse(localStorage.getItem(`answers_${userEmail}`) || "{}");
+    const mergedAnswers = { ...savedAnswers, ...userAnswers };
+
+    let filtrados = [...cursos];
+    
     if (cursoIdFiltrado) {
-      return cursos.filter(c => c.id.toString() === cursoIdFiltrado.toString());
+      filtrados = cursos.filter(c => String(c.id) === String(cursoIdFiltrado));
     }
-    return cursos.filter(c => {
-      const examen = c.secciones?.find(s => s.tipo === 'examen');
-      return examen?.preguntas.some(p => userAnswers[`${c.id}_${p.id}`] !== undefined);
-    });
-  }, [cursos, userAnswers, cursoIdFiltrado]);
 
-  const calcularResultado = (curso) => {
-    const examen = curso.secciones?.find(s => s.tipo === 'examen');
-    if (!examen) return null;
+    return filtrados.map(curso => {
+      const examen = curso.secciones?.find(s => s.tipo === 'examen');
+      if (!examen) return null;
 
-    const claveIntentos = `intentos_${curso.id}`;
-    const intentosLlevados = parseInt(localStorage.getItem(claveIntentos)) || 0;
-    const tieneOportunidades = intentosLlevados < 3;
-
-    let aciertos = 0;
-    const totalPreguntas = examen.preguntas.length;
-
-    const revision = examen.preguntas.map(pregunta => {
-      const llave = `${curso.id}_${pregunta.id}`;
-      const respuestaUsuario = userAnswers[llave];
-      const respuestaCorrecta = pregunta.respuestaCorrecta;
+      // LLAVE NORMALIZADA: Siempre string para evitar fallos de coincidencia
+      const cursoIdStr = String(curso.id);
+      const puntaje = mergedAnswers[`puntaje_${cursoIdStr}_${userEmail}`];
+      const numIntentos = parseInt(localStorage.getItem(`intentos_${cursoIdStr}_${userEmail}`) || "0");
       
-      let esCorrecta = false;
-      if (pregunta.esMultiple) {
-        esCorrecta = Array.isArray(respuestaUsuario) &&
-          Array.isArray(respuestaCorrecta) &&
-          respuestaUsuario.length === respuestaCorrecta.length &&
-          respuestaUsuario.every(val => respuestaCorrecta.map(String).includes(String(val)));
-      } else {
-        esCorrecta = respuestaUsuario !== undefined && String(respuestaUsuario) === String(respuestaCorrecta);
-      }
-      
-      if (esCorrecta) aciertos++;
+      const revision = examen.preguntas?.map(pregunta => {
+        const respuestaUsuario = mergedAnswers[`${cursoIdStr}_${pregunta.id}`];
+        const respuestaCorrecta = pregunta.respuestaCorrecta !== undefined 
+          ? pregunta.respuestaCorrecta 
+          : pregunta.respuesta;
+        
+        let esCorrecta = false;
+        
+        if (Array.isArray(respuestaCorrecta)) {
+          esCorrecta = Array.isArray(respuestaUsuario) && 
+                       respuestaUsuario.length === respuestaCorrecta.length && 
+                       respuestaUsuario.every(v => respuestaCorrecta.map(String).includes(String(v)));
+        } else {
+          esCorrecta = respuestaUsuario !== undefined && String(respuestaUsuario) === String(respuestaCorrecta);
+        }
 
-      const obtenerTexto = (val) => {
-        if (val === undefined || val === null) return "Sin responder";
-        if (Array.isArray(val)) return val.map(idx => pregunta.opciones[idx]).join(", ");
-        return pregunta.opciones[val] || "Opción no encontrada";
-      };
+        return {
+          textoPregunta: pregunta.texto,
+          opciones: pregunta.opciones || [],
+          respuestaUsuario,
+          esCorrecta,
+          respondida: respuestaUsuario !== undefined
+        };
+      }) || [];
 
       return {
-        texto: pregunta.texto,
-        tuRespuesta: obtenerTexto(respuestaUsuario),
-        esCorrecta,
-        respondida: respuestaUsuario !== undefined
+        ...curso,
+        porcentaje: puntaje ?? 0,
+        aprobado: (puntaje ?? 0) >= 80,
+        revision,
+        intentado: puntaje !== undefined,
+        numIntentos: numIntentos
       };
-    });
-
-    const porcentaje = totalPreguntas > 0 ? Math.round((aciertos / totalPreguntas) * 100) : 0;
-    
-    return { 
-      porcentaje, 
-      aprobado: porcentaje >= 80, 
-      revision,
-      intentado: revision.some(r => r.respondida),
-      intentosLlevados,
-      tieneOportunidades
-    };
-  };
+    })
+    .filter(c => c !== null && (cursoIdFiltrado || c.intentado));
+  }, [cursos, userAnswers, cursoIdFiltrado, userEmail]);
 
   return (
     <div className={styles.progresoContainer}>
       <header className={styles.headerGlass}>
-  <h1 className={styles.mainTitle}>
-    {cursoIdFiltrado ? "Resultado de tu Evaluación" : "Historial Académico"}
-  </h1>
-  <div className={styles.redDivider} />
-  <p className={styles.subtitle}>
-    {cursoIdFiltrado 
-      ? "Revisa tus aciertos antes de continuar con el siguiente módulo." 
-      : "Consulta el rendimiento de todos tus cursos completados."}
-  </p>
-</header>
+        <h1 className={styles.mainTitle}>
+          {cursoIdFiltrado ? "Resultado de tu Evaluación" : "Historial Académico"}
+        </h1>
+        <div className={styles.redDivider} />
+        <p className={styles.subtitle}>
+          {cursoIdFiltrado 
+            ? "Revisa tus aciertos antes de continuar con el siguiente módulo." 
+            : "Consulta el rendimiento de todos tus cursos completados."}
+        </p>
+      </header>
 
       <div className={styles.cursosList}>
-        {cursosAVisualizar.map(curso => {
-          const res = calcularResultado(curso);
-          if (!res || !res.intentado) return null;
-          const isOpen = cursoAbierto === curso.id;
+        {cursosAVisualizar.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px', opacity: 0.6 }}>
+            <p>No se encontraron resultados registrados para este módulo.</p>
+          </div>
+        ) : (
+          cursosAVisualizar.map(curso => {
+            const isOpen = String(cursoAbierto) === String(curso.id);
+            const bloqueado = !curso.aprobado && curso.numIntentos >= 3;
 
-          return (
-            <div key={curso.id} className={`${styles.modernCard} ${res.aprobado ? styles.cardPass : styles.cardFail}`}>
-              <div className={styles.cardHeader}>
-                <div className={styles.infoSide}>
-                  <span className={styles.moduleTag}>MÓDULO {curso.id}</span>
-                  <h3>{curso.titulo}</h3>
-                  <div className={res.aprobado ? styles.statusAprobado : styles.statusReprobado}>
-                    {res.aprobado ? <CheckCircleIcon fontSize="small" /> : <ErrorIcon fontSize="small" />}
-                    {res.aprobado ? 'ACREDITADO' : 'NO ACREDITADO'}
-                  </div>
-                </div>
-
-                <div className={styles.scoreSide}>
-                  <div className={styles.chartWrapper}>
-                    <svg viewBox="0 0 36 36" className={styles.circularChart}>
-                      <path className={styles.circleBg} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                      <path className={`${styles.circle} ${res.aprobado ? styles.circlePass : styles.circleFail}`}
-                        strokeDasharray={`${res.porcentaje}, 100`}
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    </svg>
-                    <div className={styles.percentageCenter}>
-                      <span className={styles.number}>{res.porcentaje}</span>
-                      <span className={styles.symbol}>%</span>
+            return (
+              <div key={curso.id} className={`${styles.modernCard} ${curso.aprobado ? styles.cardPass : styles.cardFail}`}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.infoSide}>
+                    <span className={styles.moduleTag}>MÓDULO {curso.id}</span>
+                    <h3>{curso.titulo}</h3>
+                    <div className={curso.aprobado ? styles.statusAprobado : styles.statusReprobado}>
+                      {curso.aprobado ? <CheckCircleIcon fontSize="small" /> : <ErrorIcon fontSize="small" />}
+                      {curso.aprobado ? 'APROBADOS' : 'NO APROBADOS'}
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <div className={styles.cardActions}>
-                <button className={styles.btnToggle} onClick={() => setCursoAbierto(isOpen ? null : curso.id)}>
-                  REVISAR DETALLES <ExpandMoreIcon className={isOpen ? styles.rotated : ''} />
-                </button>
-
-                {!res.aprobado && res.tieneOportunidades && (
-                  <button className={styles.btnReintentar} onClick={() => onResetExamen(curso.id)}>
-                    <ReplayIcon /> REINTENTAR ({3 - res.intentosLlevados})
-                  </button>
-                )}
-                {res.aprobado && <span className={styles.successStamp}>COMPLETADO ✓</span>}
-              </div>
-
-              {isOpen && (
-                <div className={styles.revisionBody}>
-                  {res.revision.map((item, i) => (
-                    <div key={i} className={styles.revisionItem}>
-                      <div className={item.esCorrecta ? styles.linePass : styles.lineFail} />
-                      <div className={styles.itemContent}>
-                        <p className={styles.preguntaText}>{item.texto}</p>
-                        <p className={styles.respuestaText}>
-                          Tu respuesta: <span className={item.esCorrecta ? styles.correct : styles.wrong}>{item.tuRespuesta}</span>
-                        </p>
+                  <div className={styles.scoreSide}>
+                    <div className={styles.chartWrapper}>
+                      <svg viewBox="0 0 36 36" className={styles.circularChart}>
+                        <path className={styles.circleBg} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path className={`${styles.circle} ${curso.aprobado ? styles.circlePass : styles.circleFail}`}
+                          strokeDasharray={`${curso.porcentaje}, 100`}
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                      </svg>
+                      <div className={styles.percentageCenter}>
+                        <span className={styles.number}>{curso.porcentaje}</span>
+                        <span className={styles.symbol}>%</span>
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              )}
-            </div>
-          );
-        })}
+
+                <div className={styles.cardActions}>
+                  <button className={styles.btnToggle} onClick={() => setCursoAbierto(isOpen ? null : curso.id)}>
+                    {isOpen ? 'OCULTAR DETALLES' : 'REVISAR DETALLES'} 
+                    <ExpandMoreIcon className={isOpen ? styles.rotated : ''} />
+                  </button>
+
+                  {!curso.aprobado && (
+                    <>
+                      {bloqueado ? (
+                        <div className={styles.badgeBloqueado}>
+                          <LockIcon fontSize="small" /> EXAMEN BLOQUEADO (3 INTENTOS)
+                        </div>
+                      ) : (
+                        <button className={styles.btnReintentar} onClick={() => onResetExamen(curso.id)}>
+                          <ReplayIcon /> REINTENTAR ({3 - curso.numIntentos} restantes)
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {isOpen && (
+                  <div className={styles.revisionBody}>
+                    {curso.revision.map((item, i) => (
+                      <div key={i} className={styles.revisionItem}>
+                        <div className={item.esCorrecta ? styles.linePass : styles.lineFail} />
+                        <div className={styles.itemContent}>
+                          <p className={styles.preguntaText}><strong>{i + 1}.</strong> {item.textoPregunta}</p>
+                          <p className={styles.respuestaText}>
+                            Tu respuesta: <span className={item.esCorrecta ? styles.correct : styles.wrong}>
+                              {item.respondida 
+                                ? (Array.isArray(item.respuestaUsuario) 
+                                    ? item.respuestaUsuario.map(idx => item.opciones[idx]).join(', ')
+                                    : item.opciones[item.respuestaUsuario])
+                                : "Sin responder"}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
 
       <footer className={styles.footerAvance}>

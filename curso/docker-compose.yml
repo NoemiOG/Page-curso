@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  # CONTENEDOR 1: Frontend
+  frontend-chakray:
+    build: .
+    container_name: chakray-frontend
+    ports:
+      - "8081:80"
+    volumes:
+      # Volumen para las presentaciones
+      - ./material/presentaciones:/usr/share/nginx/html/presentaciones:ro
+      # Volumen para el JSON de información
+      - ./material/data:/usr/share/nginx/html/datos
+    restart: always
+
+  # CONTENEDOR 2: Backend 
+  backend-chakray:
+    image: node:20-alpine 
+    container_name: chakray-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./material:/app/material
+    restart: always

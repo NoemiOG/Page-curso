@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "titulo": "CURSO 1",
+    "descripcion": "Introducción al programa.",
+    "archivo": "curso_1.json",
+    "totalLecciones": 5
+  },
+  {
+    "id": 2,
+    "titulo": "CURSO 2",
+    "descripcion": "Probando 1,2,3.",
+    "archivo": "curso_2.json",
+    "totalLecciones": 4
+  },
+  {
+    "id": 3,
+    "titulo": "CURSO 3",
+    "descripcion": "Contenido de convivencia.",
+    "archivo": "curso_3.json",
+    "totalLecciones": 6
+  },
+  {
+    "id": 4,
+    "titulo": "CURSO 4",
+    "descripcion": "Cultura general.",
+    "archivo": "curso_4.json",
+    "totalLecciones": 5
+  }
+]

@@ -1,42 +1,64 @@
 import React, { useMemo } from 'react';
 import styles from './Bienvenido.module.sass';
-import { Book, CheckCircle, PendingActions, School } from '@mui/icons-material';
 
-const Bienvenido = ({ cursos = [], onSelectCurso, mode, progresoUpdate, userAnswers = {} }) => { 
+// IMPORTACIONES DIRECTAS 
+import Book from '@mui/icons-material/Book';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import PendingActions from '@mui/icons-material/PendingActions';
+import ErrorIcon from '@mui/icons-material/Error';
+
+const Bienvenido = ({ 
+  cursos = [], 
+  onSelectCurso, 
+  userAnswers = {}, 
+  userEmail, 
+  progresoUpdate 
+}) => { 
 
   const cursosProcesados = useMemo(() => {
     return cursos.map(curso => {
-      const key = `completado_${curso.id}`;
-      const completados = JSON.parse(localStorage.getItem(key) || "[]");
+      // 1. Obtener progreso de lecciones (Teoría)
+      const storageKey = `completado_${curso.id}_${userEmail}`;
+      const completados = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      
       const lecciones = curso.secciones?.filter(s => s.tipo !== 'examen') || [];
-      const totalLecciones = lecciones.length;
+      const totalLecciones = lecciones.length > 0 ? lecciones.length : (curso.totalLecciones || 1);
       const completadasCount = lecciones.filter(s => completados.includes(s.id)).length;
-      const porcentajeTeoria = totalLecciones > 0 ? Math.round((completadasCount / totalLecciones) * 100) : 0;
+      
+      const porcentajeTeoria = Math.round((completadasCount / totalLecciones) * 100);
 
-      const examen = curso.secciones?.find(s => s.tipo === 'examen');
-      let aprobado = false;
-      if (examen) {
-        let aciertos = 0;
-        examen.preguntas.forEach(p => {
-          const resp = userAnswers[`${curso.id}_${p.id}`];
-          const correct = p.respuestaCorrecta;
-          if (p.esMultiple) {
-            if (Array.isArray(resp) && resp.length === correct.length && resp.every(v => correct.map(String).includes(String(v)))) aciertos++;
-          } else if (resp !== undefined && String(resp) === String(correct)) aciertos++;
-        });
-        aprobado = ((aciertos / examen.preguntas.length) * 100) >= 80;
+      // 2. Obtener estado del examen
+      const puntaje = userAnswers[`puntaje_${curso.id}_${userEmail}`];
+      const aprobado = puntaje !== undefined && puntaje >= 80;
+      const hizoExamen = puntaje !== undefined;
+
+      // 3. Determinar estado visual
+      let estadoActual = "Sin iniciar";
+      let progresoVisual = porcentajeTeoria;
+
+      if (aprobado) {
+        estadoActual = "Completado";
+        progresoVisual = 100;
+      } else if (hizoExamen && !aprobado) {
+        estadoActual = "Pendiente";
+        progresoVisual = Math.min(porcentajeTeoria, 99); // No llega al 100 si no aprueba
+      } else if (porcentajeTeoria > 0) {
+        estadoActual = "Pendiente";
       }
 
       return {
         ...curso,
         totalLecciones,
-        completadasCount,
-        progreso: porcentajeTeoria,
-        estado: aprobado ? "Completado" : (porcentajeTeoria > 0 ? "Pendiente" : "Sin iniciar")
+        completadasCount: aprobado ? totalLecciones : completadasCount,
+        progreso: progresoVisual,
+        estado: estadoActual,
+        nota: puntaje,
+        aprobado
       };
     });
-  }, [cursos, progresoUpdate, userAnswers]);
+  }, [cursos, progresoUpdate, userAnswers, userEmail]);
 
+  // Estadísticas para los cuadros superiores
   const stats = useMemo(() => ({
     total: cursosProcesados.length,
     completados: cursosProcesados.filter(c => c.estado === "Completado").length,
@@ -52,7 +74,7 @@ const Bienvenido = ({ cursos = [], onSelectCurso, mode, progresoUpdate, userAnsw
   const renderCard = (curso) => (
     <article 
       key={curso.id} 
-      className={`${styles.cursoCard} ${styles[`card${curso.estado.replace(" ", "")}`]}`}
+      className={`${styles.cursoCard} ${styles[`card${curso.estado.replace(/\s/g, "")}`]}`}
       onClick={() => onSelectCurso(curso)}
     >
       <div className={styles.cardTop}>
@@ -62,7 +84,7 @@ const Bienvenido = ({ cursos = [], onSelectCurso, mode, progresoUpdate, userAnsw
 
       <div className={styles.cardBody}>
         <h3>{curso.titulo}</h3>
-        <p className={styles.description}>{curso.descripcion || "Capacitación"}</p>
+        <p className={styles.description}>{curso.descripcion || "Capacitación técnica Chakray"}</p>
         
         <div className={styles.progressInfo}>
           <div className={styles.barLabels}>
@@ -70,33 +92,46 @@ const Bienvenido = ({ cursos = [], onSelectCurso, mode, progresoUpdate, userAnsw
             <span>{curso.progreso}%</span>
           </div>
           <div className={styles.fullBar}>
-            <div className={`${styles.fill} ${curso.estado === 'Completado' ? styles.fillSuccess : ''}`} style={{ width: `${curso.progreso}%` }} />
+            <div 
+              className={`${styles.fill} ${curso.estado === 'Completado' ? styles.fillSuccess : ''}`} 
+              style={{ width: `${curso.progreso}%` }} 
+            />
           </div>
           <span className={styles.counterText}>
-            {curso.completadasCount} de {curso.totalLecciones} completadas
+            {curso.estado === "Completado" 
+              ? `${curso.totalLecciones} de ${curso.totalLecciones} aprobado` 
+              : `${curso.completadasCount} de ${curso.totalLecciones} completadas`}
           </span>
+          
+          {/* Alerta de examen reprobado */}
+          {curso.nota !== undefined && !curso.aprobado && (
+            <div className={styles.reprobadoAlert}>
+              <ErrorIcon sx={{ fontSize: '14px', color: '#E11F26' }} /> 
+              <span>REPETIR EXAMEN (Nota: {curso.nota}%)</span>
+            </div>
+          )}
         </div>
       </div>
 
       <button className={styles.btnAction}>
-        {curso.estado === "Completado" ? 'REPASAR MÓDULO' : 'CONTINUAR APRENDIZAJE'}
+        {curso.estado === "Completado" ? 'REPASAR MÓDULO' : 
+         curso.nota !== undefined && !curso.aprobado ? 'REINTENTAR EXAMEN' : 'CONTINUAR APRENDIZAJE'}
       </button>
     </article>
   );
 
   return (
     <div className={styles.welcomeContainer}>
-      {/* 1. Header con Resumen General */}
       <header className={styles.dashboardHeader}>
         <div className={styles.textHero}>
           <h1>Panel de Aprendizaje</h1>
-          <p>Bienvenido de nuevo. Aquí tienes un resumen de tu actividad.</p>
+          <p>Bienvenido. Aquí tienes el resumen de tus capacitaciones.</p>
         </div>
         
         <div className={styles.statsRow}>
           <div className={styles.statItem}>
             <Book className={styles.statIcon} />
-            <div><strong>{stats.total}</strong> <span>Cursos Totales</span></div>
+            <div><strong>{stats.total}</strong> <span>Módulos</span></div>
           </div>
           <div className={styles.statItem}>
             <PendingActions className={styles.statIcon} style={{color: '#ff9800'}} />
@@ -104,17 +139,17 @@ const Bienvenido = ({ cursos = [], onSelectCurso, mode, progresoUpdate, userAnsw
           </div>
           <div className={styles.statItem}>
             <CheckCircle className={styles.statIcon} style={{color: '#2ecc71'}} />
-            <div><strong>{stats.completados}</strong> <span>Completados</span></div>
+            <div><strong>{stats.completados}</strong> <span>Aprobado</span></div>
           </div>
         </div>
       </header>
 
-      {/* 2. Secciones por Estado */}
       <div className={styles.sectionsList}>
         {Object.entries(secciones).map(([key, list]) => list.length > 0 && (
           <section key={key} className={styles.sectionGroup}>
             <h2 className={styles.groupTitle}>
-              {key === 'pendientes' ? 'Continuar' : key === 'completados' ? 'completados' : 'iniciar'}
+              {key === 'pendientes' ? 'Continuar aprendiendo' : 
+               key === 'completados' ? 'Cursos Aprobados' : 'Nuevas Capacitaciones'}
             </h2>
             <div className={styles.coursesGrid}>
               {list.map(renderCard)}

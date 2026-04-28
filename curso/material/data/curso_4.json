@@ -1,0 +1,84 @@
+  {
+    "id": 4,
+    "titulo": "CURSO 4",
+    "secciones": [
+      {
+        "id": "4a",
+        "tipo": "presentacion",
+        "label": "CODIGO 2",
+        "tituloTema": "Pruebita",
+        "textoLargo": "una introducción divis, divis"
+      },
+      {
+        "id": "4b",
+        "tipo": "presentacion_externa", 
+        "label": "TEMA 2",
+        "tituloTema": "AQUI VA UN TEMA BIEN PADRE",
+        "url": "/presentación.pdf#zoom=125&navpanes=0&toolbar=0",
+        "textoLargo": "una introducción divis, divis"
+      },
+      {
+        "id": "4c",
+        "tipo": "presentacion_externa",
+        "label": "CONTENIDO",
+        "tituloTema": "AQUI VA OTRO TEMA MAS PADRE",
+        "url": "/chakray.pdf#zoom=100&navpanes=0&toolbar=0",
+        "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
+      },
+      {
+        "id": "4d",
+        "tipo": "tema2",
+        "label": "CONTENIDO1",
+        "tituloTema": "Porque uno no es ninguno, mas temas padres",
+        "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
+      },
+      {
+        "id": "e",
+        "tipo": "examen",
+        "label": "EXAMEN",
+        "tituloTema": "EXAMEN",
+        "instrucciones": "Instrucciones del examen. Tiempo, evaluación, no comer, no distracciones. Si repruebas mejor ya ni vengas, buscate otra chamba.",
+        "preguntas": [
+          {
+    "id": "gen1",
+    "texto": "¿Cuál es la capital de Francia?",
+    "opciones": ["Madrid", "Berlín", "París", "Roma"],
+    "respuestaCorrecta": 2
+  },
+  {
+    "id": "gen2",
+    "texto": "¿Cuál de estos es un planeta gaseoso?",
+    "opciones": ["Marte", "Tierra", "Júpiter", "Venus"],
+    "respuestaCorrecta": 2
+  },
+  {
+    "id": "gen3",
+    "texto": "¿Cuántos días tiene un año bisiesto?",
+    "opciones": ["366", "365", "364", "360"],
+    "respuestaCorrecta": 0
+  },
+  {
+    "id": "gen4",
+    "texto": "¿Cuál es el océano más grande del mundo?",
+    "opciones": ["Océano Atlántico", "Océano Pacífico", "Océano Índico", "Océano Ártico"],
+    "respuestaCorrecta": 1
+  },
+  {
+    "id": "gen5",
+    "texto": "¿Qué elementos químicos componen el agua?",
+    "esMultiple": true,
+    "opciones": ["Oxígeno", "Nitrógeno", "Hidrógeno", "Carbono"],
+    "respuestaCorrecta": [0, 2]
+  },
+  {
+    "id": "gen6",
+    "texto": "¿Cuáles de estos son lenguajes de programación?",
+    "esMultiple": true,
+    "opciones": ["JavaScript", "HTML", "Python", "Sass"],
+    "respuestaCorrecta": [0, 2]
+  }
+          
+    ]
+      }
+    ]
+  }
