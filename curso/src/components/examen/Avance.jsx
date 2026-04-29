@@ -181,8 +181,15 @@ const Avance = ({
         )}
       </div>
 
-      <footer className={styles.footerAvance}>
-        <button onClick={onContinuar} className={styles.btnHome}>
+      <footer className={styles.footerAvance} style={{ position: 'relative', zIndex: 9999 }}>
+        <button 
+          onClick={(e) => {
+            e.stopPropagation(); 
+            onContinuar();
+          }} 
+          className={styles.btnHome}
+          style={{ pointerEvents: 'auto' }} 
+        >
           <ArrowBackIcon /> {cursoIdFiltrado ? "FINALIZAR REVISIÓN" : "VOLVER AL INICIO"}
         </button>
       </footer>
