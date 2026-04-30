@@ -14,7 +14,7 @@
         "tipo": "presentacion_externa", 
         "label": "TEMA 2",
         "tituloTema": "AQUI VA UN TEMA BIEN PADRE",
-        "url": "/presentación.pdf#zoom=125&navpanes=0&toolbar=0",
+        "url": "/presentaciones/chakray.pdf#zoom=100&navpanes=0&toolbar=0",
         "textoLargo": "una introducción divis, divis"
       },
       {
@@ -22,7 +22,7 @@
         "tipo": "presentacion_externa",
         "label": "CONTENIDO",
         "tituloTema": "AQUI VA OTRO TEMA MAS PADRE",
-        "url": "/chakray.pdf#zoom=100&navpanes=0&toolbar=0",
+        "url": "/presentaciones/presentación.pdf#zoom=125&navpanes=0&toolbar=0",
         "textoLargo": "Aquí un lorem largote por si quiere añadir texto así largo de la presentación"
       },
       {

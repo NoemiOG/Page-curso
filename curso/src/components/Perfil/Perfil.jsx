@@ -32,7 +32,7 @@ const Perfil = ({ usuario, onBack, cursos = [], userAnswers = {} }) => {
     const puntaje = userAnswers[`puntaje_${curso.id}_${userEmail}`];
     
     if (puntaje === undefined) return "Pendiente ✗";
-    return puntaje >= 80 ? "Completado ✓" : "No  ✗";
+    return puntaje >= 80 ? "Completado ✓" : "No completado ✗";
   };
 
   return (

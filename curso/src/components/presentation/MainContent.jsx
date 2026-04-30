@@ -3,11 +3,12 @@ import ExamenViewer from '../examen/ExamenPrueba';
 import styles from './MainContent.module.sass';
 import { 
   Box, Typography, Button, Divider, LinearProgress, 
-  Dialog, DialogContent, Zoom 
+  Dialog, DialogContent, Zoom, CircularProgress 
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ErrorOutlineTwoToneIcon from '@mui/icons-material/ErrorOutlineTwoTone';
 import LockIcon from '@mui/icons-material/Lock';
+import CheckCircleTwoToneIcon from '@mui/icons-material/CheckCircleTwoTone';
 
 const MainContent = ({ 
   activePage, 
@@ -21,16 +22,17 @@ const MainContent = ({
 }) => {
   const navigate = useNavigate();
   const [haConfirmadoExamen, setHaConfirmadoExamen] = useState(false);
+  const [estaProcesando, setEstaProcesando] = useState(false); // Estado para el loader
 
   const secciones = cursoActual?.secciones || [];
   const indexActual = secciones.findIndex(s => s.id === activePage?.id);
   const anteriorSeccion = secciones[indexActual - 1];
   const siguienteSeccion = secciones[indexActual + 1];
 
-  // --- LÓGICA DE DATOS ---
   const sId = String(cursoActual?.id || "");
-  // Obtenemos los intentos del localStorage
   const intentosRealizados = parseInt(localStorage.getItem(`intentos_${sId}_${userEmail}`) || "0");
+  const calificacionGuardada = parseFloat(localStorage.getItem(`calificacion_${sId}_${userEmail}`) || "0");
+  const yaAprobo = calificacionGuardada >= 80;
 
   const progresoTeoria = useMemo(() => {
     if (!cursoActual || !userEmail) return 0;
@@ -44,6 +46,9 @@ const MainContent = ({
 
   useEffect(() => {
     setHaConfirmadoExamen(false);
+    setEstaProcesando(false);
+    onExamStatusChange(false);
+
     if (activePage && activePage.tipo !== 'examen' && onLessonComplete) {
       onLessonComplete(activePage.id);
     }
@@ -51,67 +56,38 @@ const MainContent = ({
 
   if (!activePage) return null;
 
-  // ==========================================================
-  // BLOQUEO CRÍTICO: SI YA AGOTÓ INTENTOS Y ES TIPO EXAMEN
-  // ==========================================================
-  if (activePage.tipo === 'examen' && intentosRealizados >= 3) {
+  // MANEJADOR DE FINALIZACIÓN CON LOADER
+  const finalizarExamen = (resp, punt) => {
+    if (resp) {
+      setEstaProcesando(true); // Activamos el mensaje de "Cargando"
+      
+      // Simulamos un breve tiempo de procesamiento para que el usuario vea el feedback
+      setTimeout(() => {
+        setHaConfirmadoExamen(false);
+        onExamStatusChange(false);
+        onSaveAnswers(resp, punt);
+        setEstaProcesando(false); // Quitamos el loader
+      }, 2000);
+    } else {
+      // Si el usuario simplemente salió sin terminar
+      setHaConfirmadoExamen(false);
+      onExamStatusChange(false);
+    }
+  };
+
+  if (haConfirmadoExamen && activePage.tipo === 'examen' && !yaAprobo) {
     return (
       <main className={styles.mainContainer}>
-        <Box sx={{ display: 'flex', height: '60vh', alignItems: 'center', justifyContent: 'center' }}>
-           {/* Fondo vacío para que resalte el diálogo */}
-        </Box>
-
-        <Dialog 
-          open={true} 
-          TransitionComponent={Zoom} 
-          disableEscapeKeyDown
-          PaperProps={{ sx: { borderRadius: '20px', p: 3, textAlign: 'center', border: '2px solid #E11F26', bgcolor: '#1a1a1a', color: 'white' } }}
-        >
-          <DialogContent>
-            <ErrorOutlineTwoToneIcon sx={{ fontSize: 80, color: '#E11F26', mb: 2 }} />
-            <Typography variant="h5" sx={{ fontWeight: 900, mb: 1 }}>INTENTOS AGOTADOS</Typography>
-            <Typography variant="body1" sx={{ mb: 3, opacity: 0.8 }}>
-              Ya has realizado tus 3 intentos permitidos para este módulo.
-            </Typography>
-            <Button 
-              variant="contained" 
-              fullWidth 
-              onClick={() => { onExamStatusChange(false); navigate('/inicio'); }} 
-              sx={{ bgcolor: '#E11F26', fontWeight: 800 }}
-            >
-              SALIR AL PANEL
-            </Button>
-          </DialogContent>
-        </Dialog>
+        <ExamenViewer 
+          data={activePage} 
+          cursoId={cursoActual?.id} 
+          userEmail={userEmail} 
+          onFinish={finalizarExamen} 
+        />
       </main>
     );
   }
 
-  // ==========================================================
-  // VISTA A: EL EXAMEN YA INICIÓ (Solo tras confirmar)
-  // ==========================================================
-  if (haConfirmadoExamen && activePage.tipo === 'examen') {
-    return (
-      <main className={styles.mainContainer}>
-        <div className={styles.fullView} style={{ height: '100%', width: '100%' }}>
-          <ExamenViewer 
-            data={activePage} 
-            cursoId={cursoActual?.id} 
-            userEmail={userEmail} 
-            onFinish={(respuestas, puntaje) => {
-              onSaveAnswers(respuestas, puntaje);
-              onExamStatusChange(false);
-              setHaConfirmadoExamen(false);
-            }} 
-          />
-        </div>
-      </main>
-    );
-  }
-
-  // ==========================================================
-  // VISTA B: DISEÑO NORMAL (Lecciones o Diálogo de Inicio)
-  // ==========================================================
   return (
     <main id="mainScrollContainer" className={styles.mainContainer}>
       <div className={styles.contentWrapper}>
@@ -122,7 +98,7 @@ const MainContent = ({
           </div>
           <Box sx={{ minWidth: 200, textAlign: 'right' }}>
             <Typography variant="caption" sx={{ fontWeight: 800, color: '#E11F26', display: 'block' }}>
-              PROGRESO DEL MÓDULO: {progresoTeoria}%
+              PROGRESO: {progresoTeoria}%
             </Typography>
             <LinearProgress variant="determinate" value={progresoTeoria} sx={{ height: 10, borderRadius: 5, mt: 0.5, bgcolor: 'divider', '& .MuiLinearProgress-bar': { bgcolor: '#E11F26' } }} />
           </Box>
@@ -131,65 +107,91 @@ const MainContent = ({
         <section className={styles.viewerBlock}>
           <div className={styles.viewerFrame}>
             {activePage?.url ? (
-              <iframe 
-                src={`${activePage.url.startsWith('/') ? activePage.url : `/${activePage.url}`}#view=FitH&scrollbar=0&toolbar=0&navpanes=0`} 
-                className={styles.pdfElement} 
-                title="Material"
-                key={activePage.id} 
-              />
+              <iframe src={`${activePage.url.startsWith('/') ? activePage.url : `/${activePage.url}`}#view=FitH&scrollbar=0&toolbar=0&navpanes=0`} className={styles.pdfElement} title="Material" key={activePage.id} />
             ) : (
               <Box sx={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
-                <Typography>No hay material disponible para esta sección.</Typography>
+                <Typography variant="h6" sx={{ color: '#E11F26', fontWeight: 700 }}>
+                  {yaAprobo ? "EVALUACIÓN FINALIZADA" : "SECCIÓN DE EVALUACIÓN"}
+                </Typography>
               </Box>
             )}
           </div>
           
           <div className={styles.navigationRow}>
             <button className={styles.btnRegresar} onClick={() => onSelect(anteriorSeccion)} disabled={!anteriorSeccion}>ANTERIOR</button>
-            <button 
-              className={siguienteSeccion?.tipo === 'examen' && !teoriaCompletada ? styles.btnLocked : styles.btnSiguiente} 
-              onClick={() => onSelect(siguienteSeccion)}
-              disabled={!siguienteSeccion}
-            >
-              {siguienteSeccion?.tipo === 'examen' ? (teoriaCompletada ? "IR AL EXAMEN" : "EXAMEN BLOQUEADO") : "SIGUIENTE"}
-            </button>
+            
+            {siguienteSeccion && !(siguienteSeccion.tipo === 'examen' && yaAprobo) && (
+              <button 
+                className={(siguienteSeccion.tipo === 'examen' && !teoriaCompletada) ? styles.btnLocked : styles.btnSiguiente} 
+                onClick={() => onSelect(siguienteSeccion)}
+                disabled={siguienteSeccion.tipo === 'examen' && !teoriaCompletada}
+              >
+                {siguienteSeccion.tipo === 'examen' ? "IR AL EXAMEN" : "SIGUIENTE"}
+              </button>
+            )}
           </div>
         </section>
+
+        {/* --- MODALES --- */}
+
+        <Dialog open={estaProcesando} TransitionComponent={Zoom} PaperProps={{ sx: { borderRadius: '20px', bgcolor: '#1a1a1a', color: 'white', minWidth: '300px' } }}>
+          <DialogContent sx={{ textAlign: 'center', py: 5 }}>
+            <CircularProgress size={60} sx={{ color: '#E11F26', mb: 3 }} />
+            <Typography variant="h6" sx={{ fontWeight: 800 }}>CALIFICANDO...</Typography>
+            <Typography variant="body2" sx={{ opacity: 0.7, mt: 1 }}>Guardando tus resultados, espera un momento.</Typography>
+          </DialogContent>
+        </Dialog>
+
+        {/* MODAL DE YA APROBÓ */}
+        <Dialog open={activePage.tipo === 'examen' && yaAprobo && !estaProcesando} TransitionComponent={Zoom}>
+          <DialogContent sx={{ textAlign: 'center', p: 4, bgcolor: '#1a1a1a', color: 'white' }}>
+            <CheckCircleTwoToneIcon sx={{ fontSize: 70, color: '#4caf50', mb: 2 }} />
+            <Typography variant="h5" sx={{ fontWeight: 900, mb: 2 }}>MÓDULO ACREDITADO</Typography>
+            <Typography variant="body1" sx={{ mb: 4 }}>Calificación: {calificacionGuardada}%</Typography>
+            <Button variant="contained" fullWidth onClick={() => navigate('/inicio')} sx={{ bgcolor: '#4caf50' }}>VOLVER AL PANEL</Button>
+          </DialogContent>
+        </Dialog>
+
+        {/* MODAL DE INICIO DE EXAMEN */}
+        <Dialog open={activePage.tipo === 'examen' && !haConfirmadoExamen && teoriaCompletada && !yaAprobo && intentosRealizados < 3 && !estaProcesando} TransitionComponent={Zoom}>
+          <DialogContent sx={{ textAlign: 'center', p: 4, bgcolor: '#333', color: 'white' }}>
+            <Typography variant="h5" sx={{ fontWeight: 900, color: '#E11F26', mb: 2 }}>EVALUACIÓN FINAL</Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              • Necesitas 80% para acreditar.<br/>
+              • Intento {intentosRealizados + 1} de 3 permitidos.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+              <Button variant="outlined" fullWidth onClick={() => onSelect(anteriorSeccion)} sx={{ color: 'white', borderColor: '#777' }}>REPASAR</Button>
+              <Button variant="contained" fullWidth onClick={() => { setHaConfirmadoExamen(true); onExamStatusChange(true); }} sx={{ bgcolor: '#E11F26' }}>COMENZAR</Button>
+            </Box>
+          </DialogContent>
+        </Dialog>
+
+        {/* MODAL INTENTOS AGOTADOS */}
+        <Dialog open={activePage.tipo === 'examen' && intentosRealizados >= 3 && !yaAprobo && !estaProcesando} TransitionComponent={Zoom}>
+          <DialogContent sx={{ textAlign: 'center', p: 4, bgcolor: '#1a1a1a', color: 'white' }}>
+            <ErrorOutlineTwoToneIcon sx={{ fontSize: 70, color: '#E11F26', mb: 2 }} />
+            <Typography variant="h5" sx={{ fontWeight: 900, mb: 2 }}>INTENTOS AGOTADOS</Typography>
+            <Button variant="contained" fullWidth onClick={() => navigate('/inicio')} sx={{ bgcolor: '#E11F26', mt: 2 }}>SALIR</Button>
+          </DialogContent>
+        </Dialog>
+
+        {/* MODAL TEORÍA INCOMPLETA */}
+        <Dialog open={activePage.tipo === 'examen' && !teoriaCompletada} TransitionComponent={Zoom}>
+          <DialogContent sx={{ textAlign: 'center', p: 4, bgcolor: '#1a1a1a', color: 'white' }}>
+             <LockIcon sx={{ fontSize: 60, color: '#E11F26', mb: 2 }} />
+             <Typography variant="h6">Termina primero la teoría.</Typography>
+             <Button variant="contained" sx={{ mt: 3, bgcolor: '#E11F26' }} onClick={() => onSelect(secciones[0])}>ENTENDIDO</Button>
+          </DialogContent>
+        </Dialog>
 
         {activePage.tipo !== 'examen' && (
           <article className={styles.infoSection}>
             <Divider sx={{ mb: 3 }} />
             <h2 className={styles.subTitle}>Resumen del Tema</h2>
-            <p className={styles.description}>{activePage.textoLargo || "Revisa el material adjunto."}</p>
+            <p className={styles.description}>{activePage.textoLargo || "Revisa el material arriba."}</p>
           </article>
         )}
-
-        {/* --- MODAL DE INICIO (Solo si tiene intentos) --- */}
-        <Dialog 
-          open={activePage.tipo === 'examen' && !haConfirmadoExamen && teoriaCompletada && intentosRealizados < 3} 
-          TransitionComponent={Zoom}
-          PaperProps={{ sx: { borderRadius: '20px', p: 2, textAlign: 'center', maxWidth: '450px', bgcolor: '#333', color: 'white' } }}
-        >
-          <DialogContent>
-            <Typography variant="h5" sx={{ fontWeight: 900, color: '#E11F26', mb: 2 }}>EVALUACIÓN FINAL</Typography>
-            <Typography variant="body1" sx={{ mb: 4 }}>
-                Necesitas un <strong>80%</strong> para acreditar. ¡Éxito!
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant="contained" fullWidth onClick={() => onSelect(anteriorSeccion)} sx={{ bgcolor: '#555' }}>REPASAR</Button>
-              <Button variant="contained" fullWidth onClick={() => { setHaConfirmadoExamen(true); onExamStatusChange(true); }} sx={{ bgcolor: '#E11F26' }}>INICIAR</Button>
-            </Box>
-          </DialogContent>
-        </Dialog>
-
-        {/* MODAL DE BLOQUEO POR TEORÍA */}
-        <Dialog open={activePage.tipo === 'examen' && !teoriaCompletada} TransitionComponent={Zoom}>
-          <DialogContent sx={{ textAlign: 'center', p: 4, bgcolor: '#1a1a1a', color: 'white' }}>
-             <LockIcon sx={{ fontSize: 60, color: '#E11F26', mb: 2 }} />
-             <Typography variant="h6">Debes completar toda la teoría antes de evaluar.</Typography>
-             <Button variant="contained" sx={{ mt: 3, bgcolor: '#E11F26' }} onClick={() => onSelect(secciones[0])}>VOLVER A LECCIONES</Button>
-          </DialogContent>
-        </Dialog>
       </div>
     </main>
   );

@@ -50,8 +50,8 @@
           },
           {
             "id": "q2",
-            "texto": "Quien trabaja menos en la oficina",
-            "opciones": ["Andoni paseandose", "Randhy en el celular", "Todos trabajan por igual porque somos bien chambeadores, como de que no", "Ambos" ],
+            "texto": "Que color es el logo de Chakray",
+            "opciones": ["verde", "azul", "naranja", "rojo" ],
             "respuestaCorrecta": 2
           },
           {
